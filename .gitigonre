@@ -1,0 +1,22 @@
+# Godot 4: caché generada por el editor
+.godot/
+
+# Exportaciones y builds
+/build/
+/export/
+*.exe
+*.apk
+*.aab
+*.pck
+*.dmg
+
+# Android (plantilla de compilación)
+/android/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Editores externos
+.vscode/
+.idea/
