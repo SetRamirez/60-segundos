@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://d01m7yushq52j"]
+
+[ext_resource type="Texture2D" uid="uid://cywp1kqvjjjw7" path="res://Assets/demo_assets/tablero_transparente_demo.png" id="1_ot4jy"]
+[ext_resource type="PackedScene" uid="uid://06qg0jb36wsu" path="res://Escenas/temporizador.tscn" id="2_nfyjt"]
+
+[node name="Tablero" type="Node2D" unique_id=1082541703]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1718968996]
+position = Vector2(589, 273)
+texture = ExtResource("1_ot4jy")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=462534823]
+
+[node name="Temporizador" parent="." unique_id=434422100 instance=ExtResource("2_nfyjt")]

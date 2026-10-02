@@ -1,0 +1,102 @@
+[gd_scene format=3 uid="uid://w6s0d2oixrhe"]
+
+[ext_resource type="Script" uid="uid://csvo60eoxibol" path="res://Scripts/lobby2D.gd" id="1_0yywt"]
+[ext_resource type="Texture2D" uid="uid://dycjw1oklfdrq" path="res://Assets/demo_assets/espadas-chocando.png" id="2_0yywt"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ql73s"]
+bg_color = Color(0.40379506, 0.6285231, 0.7173691, 1)
+
+[node name="Lobby2D" type="Control" unique_id=698006558]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -958.0
+offset_top = -526.5
+offset_right = 958.0
+offset_bottom = 526.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_0yywt")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1711047023]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1119.0
+offset_top = -622.0
+offset_right = 797.0
+offset_bottom = 431.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.1599998, 1.1999998)
+color = Color(0.5294118, 0.81960785, 0.93333334, 1)
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=587285112]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -780.0
+offset_top = -478.0
+offset_right = 799.0
+offset_bottom = 527.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ql73s")
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1585900252]
+layout_mode = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="ContenedorEquipos" type="GridContainer" parent="PanelContainer/MarginContainer" unique_id=1240481260]
+layout_mode = 2
+theme_override_constants/h_separation = 800
+columns = 2
+
+[node name="Equipo 1" type="LineEdit" parent="PanelContainer/MarginContainer/ContenedorEquipos" unique_id=145321487]
+custom_minimum_size = Vector2(200, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+placeholder_text = "Equipo 1"
+alignment = 1
+
+[node name="Equipo 2" type="LineEdit" parent="PanelContainer/MarginContainer/ContenedorEquipos" unique_id=1181999263]
+custom_minimum_size = Vector2(200, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+placeholder_text = "Equipo 2"
+alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer" unique_id=1319203407]
+layout_mode = 2
+texture = ExtResource("2_0yywt")
+stretch_mode = 3
+flip_h = true
+
+[node name="MarginContainer2" type="MarginContainer" parent="PanelContainer/MarginContainer" unique_id=126995756]
+layout_mode = 2
+theme_override_constants/margin_left = 400
+theme_override_constants/margin_top = 600
+theme_override_constants/margin_right = 400
+theme_override_constants/margin_bottom = 100
+
+[node name="botonComenzar" type="Button" parent="PanelContainer/MarginContainer/MarginContainer2" unique_id=1903401754]
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 40
+text = "Comenzar Juego"
+
+[connection signal="pressed" from="PanelContainer/MarginContainer/MarginContainer2/botonComenzar" to="." method="_on_boton_comenzar_pressed"]

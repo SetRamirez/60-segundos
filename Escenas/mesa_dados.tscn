@@ -1,0 +1,101 @@
+[gd_scene format=3 uid="uid://bhvruikoqb8jg"]
+
+[ext_resource type="Texture2D" uid="uid://4qwxn8l77y8j" path="res://Assets/demo_assets/red-table-texture.jpg" id="1_2dekb"]
+[ext_resource type="Script" uid="uid://llcffpk8lpcw" path="res://Scripts/mesa_dados.gd" id="1_w0rpg"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ql73s"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lf30f"]
+albedo_texture = ExtResource("1_2dekb")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ql73s"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_vbnri"]
+bounce = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2dekb"]
+albedo_texture = ExtResource("1_2dekb")
+
+[sub_resource type="BoxMesh" id="BoxMesh_ql73s"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_oeq8l"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_5hai3"]
+bounce = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v0s4m"]
+albedo_texture = ExtResource("1_2dekb")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_v0s4m"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pcg50"]
+bounce = 1.0
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_kjdtq"]
+bounce = 1.0
+
+[node name="mesa_dados" type="Node3D" unique_id=1692459830]
+script = ExtResource("1_w0rpg")
+
+[node name="mesa" type="StaticBody3D" parent="." unique_id=1655570478]
+
+[node name="mesa-mesh" type="MeshInstance3D" parent="mesa" unique_id=480812104]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
+mesh = SubResource("PlaneMesh_ql73s")
+surface_material_override/0 = SubResource("StandardMaterial3D_lf30f")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="mesa" unique_id=553017314]
+transform = Transform3D(20, 0, 0, 0, 2, 0, 0, 0, 20, 0, -0.9, 0)
+shape = SubResource("BoxShape3D_ql73s")
+
+[node name="pared_1" type="StaticBody3D" parent="." unique_id=298354948]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
+physics_material_override = SubResource("PhysicsMaterial_vbnri")
+
+[node name="mesh-pared" type="MeshInstance3D" parent="pared_1" unique_id=1985075975]
+transform = Transform3D(20.018246, 0, 0, 0, 2.8000002, 0, 0, 0, 1, 0, 1.3816013, 0)
+material_override = SubResource("StandardMaterial3D_2dekb")
+mesh = SubResource("BoxMesh_ql73s")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pared_1" unique_id=1417809712]
+transform = Transform3D(19.780003, 0, 0, 0, 3.1325915, 0, 0, 0, 1.7, 0, 1.4924581, -0.337286)
+shape = SubResource("BoxShape3D_oeq8l")
+
+[node name="pared_2" type="StaticBody3D" parent="." unique_id=519649516]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
+physics_material_override = SubResource("PhysicsMaterial_5hai3")
+
+[node name="mesh-pared" type="MeshInstance3D" parent="pared_2" unique_id=236152250]
+transform = Transform3D(20.018246, 0, 0, 0, 2.8000002, 0, 0, 0, 1, 0, 1.3816013, 0)
+mesh = SubResource("BoxMesh_ql73s")
+surface_material_override/0 = SubResource("StandardMaterial3D_v0s4m")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pared_2" unique_id=575940518]
+transform = Transform3D(20.15, 0, 0, 0, 5, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_v0s4m")
+
+[node name="pared_3" type="StaticBody3D" parent="." unique_id=1414446673]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -10, 0, 0)
+physics_material_override = SubResource("PhysicsMaterial_pcg50")
+
+[node name="mesh-pared" type="MeshInstance3D" parent="pared_3" unique_id=1477804325]
+transform = Transform3D(20.018246, 0, 0, 0, 2.8000002, 0, 0, 0, 1, 0, 1.3816013, 0)
+mesh = SubResource("BoxMesh_ql73s")
+surface_material_override/0 = SubResource("StandardMaterial3D_v0s4m")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pared_3" unique_id=1845351386]
+transform = Transform3D(20.15, 0, 0, 0, 5, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_v0s4m")
+
+[node name="pared_4" type="StaticBody3D" parent="." unique_id=209960250]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 10, 0, 0)
+physics_material_override = SubResource("PhysicsMaterial_kjdtq")
+
+[node name="mesh-pared" type="MeshInstance3D" parent="pared_4" unique_id=1991361977]
+transform = Transform3D(20.018246, 0, 0, 0, 2.8000002, 0, 0, 0, 1, 0, 1.3816013, 0)
+mesh = SubResource("BoxMesh_ql73s")
+surface_material_override/0 = SubResource("StandardMaterial3D_v0s4m")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pared_4" unique_id=670898484]
+transform = Transform3D(20.15, 0, 0, 0, 5, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_v0s4m")

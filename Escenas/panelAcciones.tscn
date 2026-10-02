@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://dgr3ynvglke2g"]
+
+[ext_resource type="Script" uid="uid://dp57u45nh35dd" path="res://Scripts/panel_acciones.gd" id="1_xdden"]
+
+[node name="PanelAcciones" type="PanelContainer" unique_id=1356457845]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -148.0
+offset_top = -86.0
+offset_right = 149.0
+offset_bottom = 70.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_xdden")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=523283849]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=495664612]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="labelEquipoDeTurno" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1771710098]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Equipo de turno"
+horizontal_alignment = 1
+
+[node name="botonTirarDado" type="Button" parent="MarginContainer/VBoxContainer" unique_id=266770575]
+layout_mode = 2
+theme_override_font_sizes/font_size = 50
+text = "Tirar Dado"
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/botonTirarDado" to="." method="_on_boton_tirar_dado_pressed"]

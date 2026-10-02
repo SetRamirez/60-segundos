@@ -1,0 +1,73 @@
+[gd_scene format=3 uid="uid://ca5dbi4bl84me"]
+
+[ext_resource type="Script" uid="uid://dosn0y4vmrflc" path="res://Scripts/mundo.gd" id="1_nhmaw"]
+[ext_resource type="PackedScene" uid="uid://bhvruikoqb8jg" path="res://Escenas/mesa_dados.tscn" id="3_nhmaw"]
+[ext_resource type="Texture2D" uid="uid://b0gap2icpblvy" path="res://Assets/demo_assets/tablero-textura.png" id="3_wxw8o"]
+[ext_resource type="PackedScene" uid="uid://b64a8nma5h374" path="res://Escenas/dado.tscn" id="4_htlm0"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_g3dvk"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_4hew7"]
+sky_material = SubResource("ProceduralSkyMaterial_g3dvk")
+
+[sub_resource type="Environment" id="Environment_u2u0v"]
+background_mode = 2
+sky = SubResource("Sky_4hew7")
+glow_enabled = true
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ql73s"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v0s4m"]
+albedo_texture = ExtResource("3_wxw8o")
+
+[sub_resource type="Curve3D" id="Curve3D_wxw8o"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -18, 0, 0, 0, 0, 0, 0, -26, 0, -18, 0, 0, 0, 0, 0, 0, -26, 0, -2, 0, 0, 0, 0, 0, 0, -4, 0, -2, 0, 0, 0, 0, 0, 0, -4, 0, -14, 0, 0, 0, 0, 0, 0, -22, 0, -14, 0, 0, 0, 0, 0, 0, -22, 0, -6, 0, 0, 0, 0, 0, 0, -20, 0, -6),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 9
+
+[node name="Mundo" type="Node3D" unique_id=1530070908]
+script = ExtResource("1_nhmaw")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1057893700]
+environment = SubResource("Environment_u2u0v")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1834613305]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1780239744]
+transform = Transform3D(1, -8.351872e-23, -4.371139e-08, 4.371139e-08, 1.9106855e-15, 1, 0, -1, 1.9106855e-15, 0, 16, 0)
+
+[node name="tablero" type="MeshInstance3D" parent="." unique_id=2021961108]
+transform = Transform3D(16, 0, 0, 0, 1, 0, 0, 0, 11, 0, 0, 0)
+mesh = SubResource("PlaneMesh_ql73s")
+surface_material_override/0 = SubResource("StandardMaterial3D_v0s4m")
+
+[node name="Path3D" type="Path3D" parent="." unique_id=1126557479]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, 10)
+curve = SubResource("Curve3D_wxw8o")
+
+[node name="mesa_dados" parent="." unique_id=1692459830 instance=ExtResource("3_nhmaw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.25014, 0, -0.22614002)
+
+[node name="Dado" parent="." unique_id=1772409807 instance=ExtResource("4_htlm0")]
+transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 30, 1, 0)
+
+[node name="resultado-dado" type="Label3D" parent="." unique_id=775582851]
+transform = Transform3D(8, 6.9938227e-07, 6.9938216e-07, -6.993822e-07, 3.4969105e-07, 8, 6.993822e-07, -8, 3.496911e-07, 30, 3, 0)
+text = "0
+"
+
+[node name="posicionCamaras" type="Node3D" parent="." unique_id=1464834906]
+
+[node name="vistaTableroGral" type="Marker3D" parent="posicionCamaras" unique_id=1294141954]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 0)
+
+[node name="vistaMesaDados" type="Marker3D" parent="posicionCamaras" unique_id=39367501]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 13, 0)
+
+[connection signal="tiro_finalizado" from="Dado" to="." method="_on_dado_tiro_finalizado"]

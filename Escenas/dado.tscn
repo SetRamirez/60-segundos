@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://b64a8nma5h374"]
+
+[ext_resource type="Script" uid="uid://bklc1ve01rdye" path="res://Scripts/dado.gd" id="1_753o7"]
+[ext_resource type="PackedScene" uid="uid://jrdf37dnytiq" path="res://Assets/dado.blend" id="1_ynjrm"]
+[ext_resource type="PackedScene" uid="uid://bcag2ni0agmhu" path="res://Escenas/raycast_dado.tscn" id="3_nx5p0"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sdhfp"]
+size = Vector3(2, 2, 2)
+
+[node name="Dado" type="RigidBody3D" unique_id=1772409807]
+gravity_scale = 2.0
+freeze = true
+script = ExtResource("1_753o7")
+
+[node name="dado" parent="." unique_id=1421559558 instance=ExtResource("1_ynjrm")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2012812841]
+shape = SubResource("BoxShape3D_sdhfp")
+
+[node name="Raycasts" type="Node3D" parent="." unique_id=849025627]
+
+[node name="raycast_dado1" parent="Raycasts" unique_id=1807044673 instance=ExtResource("3_nx5p0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+opposite_side = 6
+
+[node name="raycast_dado2" parent="Raycasts" unique_id=193276316 instance=ExtResource("3_nx5p0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0)
+target_position = Vector3(-0.1, 0, 0)
+opposite_side = 5
+
+[node name="raycast_dado3" parent="Raycasts" unique_id=863543106 instance=ExtResource("3_nx5p0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+target_position = Vector3(0, 0, -0.1)
+opposite_side = 4
+
+[node name="raycast_dado4" parent="Raycasts" unique_id=1599826886 instance=ExtResource("3_nx5p0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+target_position = Vector3(0, 0, 0.1)
+opposite_side = 3
+
+[node name="raycast_dado5" parent="Raycasts" unique_id=1297981701 instance=ExtResource("3_nx5p0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0)
+target_position = Vector3(0.1, 0, 0)
+opposite_side = 2
+
+[node name="raycast_dado6" parent="Raycasts" unique_id=1806298529 instance=ExtResource("3_nx5p0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+target_position = Vector3(0, 0.1, 0)
+opposite_side = 1
+
+[connection signal="sleeping_state_changed" from="." to="." method="_on_sleeping_state_changed"]
