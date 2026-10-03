@@ -22,13 +22,6 @@ glow_enabled = true
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v0s4m"]
 albedo_texture = ExtResource("3_wxw8o")
 
-[sub_resource type="Curve3D" id="Curve3D_wxw8o"]
-_data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -18, 0, 0, 0, 0, 0, 0, -26, 0, -18, 0, 0, 0, 0, 0, 0, -26, 0, -2, 0, 0, 0, 0, 0, 0, -4, 0, -2, 0, 0, 0, 0, 0, 0, -4, 0, -14, 0, 0, 0, 0, 0, 0, -22, 0, -14, 0, 0, 0, 0, 0, 0, -22, 0, -6, 0, 0, 0, 0, 0, 0, -20, 0, -6),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
-}
-point_count = 9
-
 [node name="Mundo" type="Node3D" unique_id=1530070908]
 script = ExtResource("1_nhmaw")
 
@@ -46,10 +39,6 @@ transform = Transform3D(1, -8.351872e-23, -4.371139e-08, 4.371139e-08, 1.9106855
 transform = Transform3D(16, 0, 0, 0, 1, 0, 0, 0, 11, 0, 0, 0)
 mesh = SubResource("PlaneMesh_ql73s")
 surface_material_override/0 = SubResource("StandardMaterial3D_v0s4m")
-
-[node name="Path3D" type="Path3D" parent="." unique_id=1126557479]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, 10)
-curve = SubResource("Curve3D_wxw8o")
 
 [node name="mesa_dados" parent="." unique_id=1692459830 instance=ExtResource("3_nhmaw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.25014, 0, -0.22614002)
