@@ -1,68 +1,60 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Proyecto
+"60 segundos": juego de mesa 3D de preguntas por equipos (estilo Jackbox), hecho en **Godot 4.7**, con un servidor relay en **Node.js + `ws`** (WebSocket plano, no Socket.io). Hay cuatro categorías de preguntas. En su turno, cada equipo tiene 60 segundos para responder todas las que pueda, y gana el primero que llega al final del tablero.
 
-## What this is
+- Godot corre en el PC anfitrión, en la pantalla grande. Los jugadores se unen desde el celular por la LAN.
+- Servidor: `cd server && npm install && npm start` (escucha en `0.0.0.0:3000`; se cambia con `PORT=...`). No hay tests, linter ni build. `server/public/` se sirve tal cual.
+- F5 (escena principal) está roto: `GameManager.EmpezarLobby` carga `res://Escenas/lobby_2d.tscn`, que ya no existe. Para probar el tablero, abre `Escenas/Mundo.tscn` y pulsa F6; sin lobby, `mundo.gd` crea dos fichas de prueba.
 
-"60 segundos": a team-based timed quiz board game. There are four question categories. On its turn, a team has 60 seconds to answer as many questions as it can, and the first team to reach the end of the board wins (from `README.md`). Two parts:
+## Idioma
+- Responde siempre en español.
+- Mantén en español los nombres que ya existen en el código (`colaFichasPendientes`, `PanelAcciones`, `turnoEquipoId`, `moverFicha`, etc.) y sigue esa convención al crear nombres nuevos.
 
-- **Godot 4.7 game** (repo root: `project.godot`, `Scripts/`, `Escenas/`, `Assets/`). Forward Plus, Jolt physics, d3d12 on Windows. Runs on the host PC, shown on a big screen.
-- **Node relay server** (`server/`). Players join from their phones over the LAN; the server sits between the phones and Godot.
+## Arquitectura (respétala)
+- **Autoload `GameManager`** (`Scripts/GameManager.gd`): guarda el estado de la partida (equipos, `turnoEquipoId`) y cambia de escena. Avisa a las escenas mediante señales: `simular_dado`, `ficha_movida`, `turno_equipo_cambiado`.
+- **`Hub`** (`Scripts/hub_client.gd`): el cliente WebSocket hacia el servidor. Va a ser un autoload, pero **todavía no está registrado** en `project.godot`.
+- **`Mundo.tscn` / `mundo.gd`** maneja lo visual en 3D: la cámara, el dado (`dado.gd`), el `Path3D` del tablero y la secuencia del tiro.
+- La UI son `CanvasLayer`s dentro de `Mundo.tscn`: `HUD/PanelAcciones` (el botón de tirar) y `Temporizador` (60 s).
+- Las fichas se mueven con `PathFollow3D`. La distancia por casilla es la longitud baked de la curva dividida entre `NUMERO_CASILLAS - 1`. Si cambias la textura del tablero, hay que redibujar la curva y actualizar `NUMERO_CASILLAS`.
+- `colaFichasPendientes` guarda las fichas pedidas antes de que exista el `Path3D`, para evitar problemas de timing entre los datos del lobby y la escena lista.
+- Cuando dos fichas comparten casilla, `actualizarOffsets()` las separa con `h_offset`.
+- Usa `call_deferred` cuando haya errores de árbol ocupado en los cambios de escena.
+- Muchas conexiones de señales están en los `.tscn`, no en el código (busca `[connection` en `Escenas/`).
+- Si un cambio rompe alguno de estos patrones, avísame antes de hacerlo y explica por qué.
 
-Code, identifiers and user-facing strings are in Spanish — keep it that way.
+### Flujo de un turno
+Aviso de turno (`PanelAcciones` centrado con "Turno de X") → botón → `GameManager.tirarDado()` → `simular_dado` (el panel se oculta) → la cámara va a la mesa y el dado rueda → `tiro_finalizado` → la cámara vuelve → `GameManager.moverFicha()` → `ficha_movida` → `Temporizador.iniciar()` (solo si estaba parado) y el panel vuelve para poder tirar otra vez → `tiempo_agotado` → `GameManager.avanzarTurno()` → `turno_equipo_cambiado` → `Temporizador.reiniciar()` y aviso del nuevo equipo.
 
-## Commands
+Para ganar hay que caer **exacto** en la última casilla. Si el dado da de más, `moverFicha` lleva la ficha hasta el final y la hace retroceder las casillas que se pasó. Al caer exacto se emite `partida_terminada` en lugar de `ficha_movida`, y `mundo.gd` para el reloj, oculta el panel y muestra al ganador.
 
-```sh
-cd server && npm install && npm start   # listens on 0.0.0.0:3000 (override with PORT=...)
-```
+Solo se avanza dentro del minuto del turno. Si el reloj se agota durante una tirada, el turno cambia en ese momento y la tirada no cuenta: `mundo.gd` compara `GameManager.turno_actual` con el de cuando se pulsó tirar y no llama a `moverFicha`. El aviso del nuevo equipo espera a que termine la tirada descartada. Si la ficha ya estaba en movimiento, termina de moverse pero no arranca el reloj.
 
-Then run the project from the Godot editor. There are no tests, linter, or build step. `server/public/` is served statically as-is (plain HTML/JS, no bundler).
+### Servidor (`server/server.js`)
+- Los celulares se conectan a `/ws`. Godot se conecta a `/host` (`ws://127.0.0.1:3000/host`), que solo se acepta desde la misma máquina. Solo hay un host a la vez.
+- El servidor solo maneja la lista de jugadores (nombre de 1 a 16 caracteres, equipo 1 o 2, máximo 20 por equipo) y reenvía mensajes. La lógica del juego va en Godot.
+- Protocolo (JSON con campo `type`):
+  - Celular → servidor: `join {name, team, id?}` y `leave`. Cualquier otro mensaje se reenvía a Godot como `player_message {id, data}`.
+  - Godot → servidor: `send {id, data}` (a un jugador) y `broadcast {data}` (a todos).
+  - Servidor → Godot: `info {url}`, `roster`, `player_joined`, `player_left` y `player_message`.
+- Reconexión: el celular guarda su `id` y lo reenvía con `join`. Si el `id` ya está en la lista, el servidor cambia el socket sin avisar a Godot.
+- Si cambias el protocolo, hay que tocar los tres lados: `server/server.js`, `server/public/index.html` y `Scripts/hub_client.gd`.
 
-- Running the main scene (F5) currently breaks: `GameManager._ready` jumps straight to the missing `lobby_2d.tscn` (see loose ends). To test the board, open `Escenas/Mundo.tscn` and press F6.
-- Many signal connections live in `.tscn` files rather than in code. For example, `Mundo.tscn` connects `Dado.tiro_finalizado` to `mundo.gd`. To trace a flow, grep `\[connection` in `Escenas/`.
+### Cabos sueltos conocidos
+- El lobby no está terminado: `Escenas/UI/lobby/lobby.tscn` no tiene script y `Scripts/lobby.tscn` es una copia con rutas rotas.
+- `Escenas/UI/UI.tscn` / `ui.gd` es una copia muerta del HUD (llama a `solicitar_tirar_dado`, que no existe). `GameManager.conectar_dado` no se usa.
+- `Escenas/main.tscn` instancia `gameManager.tscn`, así que hay un segundo `GameManager` además del autoload.
 
-## Godot game
+## Cómo explicarme los cambios
+Estoy aprendiendo, así que explica lo que haces:
+1. **Antes de modificar o crear un archivo:** 1-2 frases sobre qué vas a cambiar y por qué.
+2. **Después de cada cambio:** resume qué hiciste y qué efecto tiene en el resto del proyecto (qué señales, nodos o mensajes del servidor se ven afectados).
+3. **Conceptos no triviales** (señales, `Path3D`, `await`, `Tween`, WebSockets, async): explícalos en pocas líneas la primera vez que aparezcan.
+4. **Alternativas:** si había otra opción razonable, dime brevemente por qué elegiste esta.
+5. Un concepto a la vez; prefiero profundidad a un resumen amplio.
 
-- **Autoload `GameManager`** (`Scripts/GameManager.gd`) holds game state and drives scene changes: `_ready` → lobby scene → `recibirDatos(nombre1, nombre2)` → `iniciar_partida()` picks a random starting team and loads `Escenas/Mundo.tscn`.
-- **Board**: `Mundo.tscn` (`mundo.gd`) calls `GameManager.registarPath($Path3D)` on ready. Team pieces (`Escenas/equipo.tscn`, script `jugador.gd`, `class_name Equipo`) are spawned as children of a `PathFollow3D` on that path. If a piece is requested before the path exists, it is queued in `colaFichasPendientes`. The `Path3D` curve in `Mundo.tscn` passes through the centers of the 61 squares on `tablero-textura.png`. It is a spiral that starts at the bottom-right corner, `(13,0,8)`; each square is 2×2 world units. Movement tweens `PathFollow3D.progress` to `posicion * baked_length / (NUMERO_CASILLAS - 1)`. If you change the board texture, you have to redraw that curve and update `NUMERO_CASILLAS`.
-- **Dice**: `dado.gd` is a physics `RigidBody3D` with child `RayCast3D`s (`raycast_dado.gd`, each exporting `opposite_side`). When the body goes to sleep, the colliding raycast's value is emitted as `tiro_finalizado`. `GameManager.conectar_dado` wires that to `moverFicha`.
-- **UI**: `Escenas/UI/UI.tscn` (`ui.gd`) hosts `panelAcciones` (the roll button) and `temporizador` (a `Timer` shown as text).
-- **Lobby**: `Escenas/UI/lobby/lobby.tscn` + `Scripts/lobby.gd` show two `TeamPanel`s (`team_panel.gd`) filled from the `Hub` autoload's signals.
-
-### Known loose ends (work in progress — verify before relying on them)
-
-- `Hub` (`Scripts/hub_client.gd`) is not yet registered in `[autoload]` in `project.godot`.
-- `Escenas/UI/lobby/lobby.tscn` has no script attached. `Scripts/lobby.tscn` is a stray copy pointing at nonexistent `res://scenes/lobby/...` paths.
-- `GameManager.EmpezarLobby` loads `res://Escenas/lobby_2d.tscn`, which no longer exists.
-- Roll flow that works: `Mundo.tscn` → `HUD/PanelAcciones` button → `GameManager.tirarDado()` → signal `simular_dado` → `dado._tirar()`. `Escenas/UI/UI.tscn` / `ui.gd` is a dead copy of this: it looks for `$HUD/PanelAcciones` (not in that scene) and calls a nonexistent `solicitar_tirar_dado`.
-- Camera sequence in `mundo.gd`: on `simular_dado`, the camera moves to `vistaMesaDados` (only the marker's position is used; the camera keeps its downward rotation). On `tiro_finalizado`, it waits `pausa_resultado`, returns to its saved transform, and only then calls `GameManager.moverFicha` to move the piece of `turnoEquipoId`. `GameManager.conectar_dado` is unused.
-- Turn timer: `Mundo.tscn` instances `Escenas/temporizador.tscn` (60 s, no autostart). When `moverFicha`'s tween ends, `GameManager` emits `ficha_movida`, and `mundo.gd` calls `temporizador.iniciar()`, which only starts the timer if it is stopped. Its `tiempo_agotado` signal calls `GameManager.avanzarTurno()`, which switches `turnoEquipoId` and emits `turno_equipo_cambiado`. `mundo.gd` then calls `temporizador.reiniciar()`. A roll is not blocked while the timer runs, and nothing stops a roll that is in progress when time runs out.
-- When `Mundo.tscn` runs directly (F6), with no lobby, `mundo.gd` creates two test pieces.
-- `Escenas/main.tscn` (the main scene) also instances `gameManager.tscn`, so a second `GameManager` node exists alongside the autoload. That node runs its own `_ready`, which also calls `EmpezarLobby`. It also instances the dead `Escenas/UI/UI.tscn`.
-
-## Relay server (`server/server.js`)
-
-- **Phones** load `server/public/index.html` and open a WebSocket to `/ws`.
-- **Godot** connects to `/host` (`ws://127.0.0.1:3000/host`, hardcoded in `Scripts/hub_client.gd`). The upgrade handler rejects `/host` from any non-loopback address. Only one host connects at a time; a new host connection closes the previous one.
-- The server owns the player roster (`players` Map, in memory only) and enforces the join rules: the name must be non-empty and is silently truncated to 16 chars, the team must be 1 or 2, and `MAX_PER_TEAM` = 20. Game logic belongs in Godot. Apart from managing the roster, the server only relays messages.
-
-### Message protocol (JSON, `type` field)
-
-- **Phone → server**: `join {name, team, id?}` and `leave`. Anything else from a joined player is forwarded to Godot wrapped as `player_message {id, data}`.
-- **Server → phone**: `joined {id,name,team}`, `left`, `error {message}`, and `counts {teams, max}`. `counts` is broadcast to every connected socket, whether it has joined or not. Phones also receive any payload Godot sends.
-- **Godot → server**: `send {id, data}` goes to one player and `broadcast {data}` goes to all joined players. `data` is delivered to the phone unwrapped.
-- **Server → Godot**: `info {url}` (the LAN URL for phones) and `roster {players}` on connect, then `player_joined`, `player_left` and `player_message`.
-
-When changing the protocol, update all three ends: `server/server.js`, `server/public/index.html`, and `Scripts/hub_client.gd`.
-
-### Reconnects
-
-The phone stores its `{id, name, team}` in localStorage and re-sends `join` with that `id` on reconnect. If the id (12 hex chars) is already in the roster, the server swaps in the new socket, keeps the stored name and team (it ignores the ones sent), and replies `joined` *without* notifying Godot, so page reloads are invisible to the game. A player is removed (and `player_left` sent) only on an explicit `leave`, or when their current socket closes.
-
-### Godot side of the connection
-
-`hub_client.gd` (intended autoload `Hub`):
-- reconnects every 2 seconds;
-- mirrors the roster in `Hub.players` (`id -> {name, team}`) and clears it on disconnect;
-- exposes signals plus `send_to_player(id, data)` and `broadcast(data)`.
+## Forma de trabajo
+- Haz cambios pequeños y enfocados; no refactorices cosas que no te pedí.
+- Si la petición es ambigua o toca varios sistemas a la vez, propón un plan y espera mi OK antes de editar.
+- Si algo del cliente (Godot) y del servidor (Node) tiene que cambiar junto, dime qué toca de cada lado.
+- No inventes nodos, señales ni eventos: revisa que existan en el proyecto antes de usarlos.

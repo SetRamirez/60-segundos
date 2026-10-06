@@ -11,6 +11,12 @@ func _ready() -> void:
 func configurar_estado(puedeTirar: bool) -> void:
 	botonTirarDado.disabled = not puedeTirar
 
+# Aviso de inicio de turno: muestra el panel con el equipo que juega.
+func mostrar_turno(nombreEquipo: String) -> void:
+	labelEquipo.text ="Turno de %s" % nombreEquipo
+	configurar_estado(true)
+	show()
+
 
 func _on_boton_tirar_dado_pressed() -> void:
 	GameManager.tirarDado()

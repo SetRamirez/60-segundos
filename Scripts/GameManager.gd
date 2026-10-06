@@ -15,6 +15,7 @@ signal tablero_listo
 signal simular_dado
 signal ficha_movida(equipoId: int)  # al terminar la animación de moverFicha
 signal turno_equipo_cambiado(equipoId: int)
+signal partida_terminada(equipoId: int)  # un equipo cayó exacto en la última casilla
 
 func _ready():
 	EmpezarLobby()
@@ -83,17 +84,34 @@ func moverFicha(casillas: int) -> Tween:
 	var largoTotal := path_3D.curve.get_baked_length()
 	var distanciaPorCasilla := largoTotal / float(NUMERO_CASILLAS - 1)
 
-	# evita pasarse del final, arreglar despues para que avanze hasta el final y vuelva
-	equipo.posicion = mini(equipo.posicion + casillas, NUMERO_CASILLAS - 1)
+	# Para ganar hay que caer exacto en la última casilla: si sobran puntos,
+	# la ficha llega al final y retrocede las casillas que se pasó.
+	var ultima := NUMERO_CASILLAS - 1
+	var destino: int = equipo.posicion + casillas
+	var exceso := maxi(destino - ultima, 0)
+	equipo.posicion = maxi(destino - 2 * exceso, 0)
 
+	# Los tramos se ejecutan en orden; los 0.8 s se reparten según las casillas de cada uno.
+	var segundosPorCasilla := 0.8 / maxi(casillas, 1)
 	var tween := create_tween()
 	tween.tween_property(
 		equipo.pathFicha, "progress",
-		equipo.posicion * distanciaPorCasilla,
-		0.8
+		mini(destino, ultima) * distanciaPorCasilla,
+		(casillas - exceso) * segundosPorCasilla
 	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	if exceso > 0:
+		tween.tween_property(
+			equipo.pathFicha, "progress",
+			equipo.posicion * distanciaPorCasilla,
+			exceso * segundosPorCasilla
+		).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	actualizarOffsets(0.8)
-	tween.finished.connect(func(): ficha_movida.emit(equipo.id))
+	tween.finished.connect(func():
+		if equipo.posicion == ultima:
+			partida_terminada.emit(equipo.id)  # el reloj no arranca: no se emite ficha_movida
+		else:
+			ficha_movida.emit(equipo.id)
+	)
 	return tween
 
 # Separa las fichas que comparten casilla; una ficha sola en su casilla vuelve al centro.
