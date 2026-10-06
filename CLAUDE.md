@@ -19,6 +19,9 @@ cd server && npm install && npm start   # listens on 0.0.0.0:3000 (override with
 
 Then run the project from the Godot editor. There are no tests, linter, or build step. `server/public/` is served statically as-is (plain HTML/JS, no bundler).
 
+- Running the main scene (F5) currently breaks: `GameManager._ready` jumps straight to the missing `lobby_2d.tscn` (see loose ends). To test the board, open `Escenas/Mundo.tscn` and press F6.
+- Many signal connections live in `.tscn` files rather than in code. For example, `Mundo.tscn` connects `Dado.tiro_finalizado` to `mundo.gd`. To trace a flow, grep `\[connection` in `Escenas/`.
+
 ## Godot game
 
 - **Autoload `GameManager`** (`Scripts/GameManager.gd`) holds game state and drives scene changes: `_ready` → lobby scene → `recibirDatos(nombre1, nombre2)` → `iniciar_partida()` picks a random starting team and loads `Escenas/Mundo.tscn`.
@@ -36,7 +39,7 @@ Then run the project from the Godot editor. There are no tests, linter, or build
 - Camera sequence in `mundo.gd`: on `simular_dado`, the camera moves to `vistaMesaDados` (only the marker's position is used; the camera keeps its downward rotation). On `tiro_finalizado`, it waits `pausa_resultado`, returns to its saved transform, and only then calls `GameManager.moverFicha` to move the piece of `turnoEquipoId`. `GameManager.conectar_dado` is unused. `avanzarTurno` is never called, so the same team keeps moving.
 - When `Mundo.tscn` runs directly (F6), with no lobby, `mundo.gd` creates two test pieces.
 - `avanzarTurno` uses `==` where it means `=`.
-- `Escenas/main.tscn` (the main scene) also instances `gameManager.tscn`, so a second `GameManager` node exists alongside the autoload.
+- `Escenas/main.tscn` (the main scene) also instances `gameManager.tscn`, so a second `GameManager` node exists alongside the autoload. That node runs its own `_ready`, which also calls `EmpezarLobby`.
 
 ## Relay server (`server/server.js`)
 
