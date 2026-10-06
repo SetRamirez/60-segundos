@@ -2,6 +2,7 @@ extends Node
 # GameManager.gd
 #var jugadores: Array = []
 const NUMERO_CASILLAS = 61  # casillas del Path3D de Mundo.tscn, incluida la de salida
+const OFFSET_MISMA_CASILLA = 0.5  # separación lateral de las fichas que comparten casilla
 var turno_actual: int = 0
 var turnoEquipoId: int;
 var equipos = {}
@@ -12,6 +13,8 @@ var colaFichasPendientes: Array = []
 
 signal tablero_listo
 signal simular_dado
+signal ficha_movida(equipoId: int)  # al terminar la animación de moverFicha
+signal turno_equipo_cambiado(equipoId: int)
 
 func _ready():
 	EmpezarLobby()
@@ -28,8 +31,7 @@ func _procesarFichasPendientes():
 	for datos in colaFichasPendientes:
 		_crearFicha(datos[0], datos[1])
 	colaFichasPendientes.clear()
-	if path_3D.get_child_count() >= 2:
-		verificarMismaCasillaFinal()
+	actualizarOffsets()
 
 func instanciarFicha(nombre: String, id: int):
 	if path_3D == null:
@@ -71,11 +73,11 @@ func tirarDado():
 func _on_dado_tiro_finalizado(resultado: int) -> void:
 	moverFicha(resultado)
 	
-func moverFicha(casillas: int) ->void:
+func moverFicha(casillas: int) -> Tween:
 	var equipo = equipos.get("equipo%s" % turnoEquipoId)
 	if equipo == null:
 		push_error("No hay ficha para el equipo %s" % turnoEquipoId)
-		return
+		return null
 
 	# La casilla 0 es la salida; el camino tiene NUMERO_CASILLAS - 1 tramos iguales.
 	var largoTotal := path_3D.curve.get_baked_length()
@@ -90,26 +92,37 @@ func moverFicha(casillas: int) ->void:
 		equipo.posicion * distanciaPorCasilla,
 		0.8
 	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	
-func verificarMismaCasillaFinal():
-	var pathEquipo1 = path_3D.get_child(0)
-	var pathEquipo2 = path_3D.get_child(1)
-	#luego cambiar el progress por numero de casillas para mejor transicion
-	if pathEquipo1.progress == pathEquipo2.progress:
-		pathEquipo1.h_offset = 0.5
-		pathEquipo2.h_offset = -0.5
+	actualizarOffsets(0.8)
+	tween.finished.connect(func(): ficha_movida.emit(equipo.id))
+	return tween
+
+# Separa las fichas que comparten casilla; una ficha sola en su casilla vuelve al centro.
+# Con duracion > 0 el cambio se anima (moverFicha lo hace a la vez que el avance).
+func actualizarOffsets(duracion := 0.0) -> void:
+	for equipo in equipos.values():
+		var compartida: bool = equipos.values().any(
+			func(otro): return otro != equipo and otro.posicion == equipo.posicion)
+		var offset := 0.0
+		if compartida:
+			offset = OFFSET_MISMA_CASILLA if equipo.id == 1 else -OFFSET_MISMA_CASILLA
+		if duracion > 0.0:
+			create_tween().tween_property(equipo.pathFicha, "h_offset", offset, duracion)
+		else:
+			equipo.pathFicha.h_offset = offset
 
 func comenzarTurno():
 	#hacer visible el panelAcciones
 	
 	pass
 
-func avanzarTurno(jugador_id: int):
+func avanzarTurno():
 	#Cambiar turnos
 	if turnoEquipoId ==1:
-		turnoEquipoId ==2
-	else : 
+		turnoEquipoId =2
+	else :
 		turnoEquipoId =1
+	turno_actual += 1
+	turno_equipo_cambiado.emit(turnoEquipoId)
 
 func iniciar_partida():
 	turno_actual = 0

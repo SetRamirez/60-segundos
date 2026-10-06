@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://b0gap2icpblvy" path="res://Assets/demo_assets/tablero-textura.png" id="3_wxw8o"]
 [ext_resource type="PackedScene" uid="uid://b64a8nma5h374" path="res://Escenas/dado.tscn" id="4_htlm0"]
 [ext_resource type="PackedScene" uid="uid://dgr3ynvglke2g" path="res://Escenas/panelAcciones.tscn" id="5_panel"]
+[ext_resource type="PackedScene" uid="uid://06qg0jb36wsu" path="res://Escenas/temporizador.tscn" id="6_tempo"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_g3dvk"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -85,5 +86,7 @@ offset_right = -40.0
 offset_bottom = -40.0
 grow_horizontal = 0
 grow_vertical = 0
+
+[node name="Temporizador" parent="." instance=ExtResource("6_tempo")]
 
 [connection signal="tiro_finalizado" from="Dado" to="." method="_on_dado_tiro_finalizado"]

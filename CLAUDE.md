@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-"60 segundos": a team-based timed quiz board game. Two parts:
+"60 segundos": a team-based timed quiz board game. There are four question categories. On its turn, a team has 60 seconds to answer as many questions as it can, and the first team to reach the end of the board wins (from `README.md`). Two parts:
 
 - **Godot 4.7 game** (repo root: `project.godot`, `Scripts/`, `Escenas/`, `Assets/`). Forward Plus, Jolt physics, d3d12 on Windows. Runs on the host PC, shown on a big screen.
 - **Node relay server** (`server/`). Players join from their phones over the LAN; the server sits between the phones and Godot.
@@ -36,16 +36,16 @@ Then run the project from the Godot editor. There are no tests, linter, or build
 - `Escenas/UI/lobby/lobby.tscn` has no script attached. `Scripts/lobby.tscn` is a stray copy pointing at nonexistent `res://scenes/lobby/...` paths.
 - `GameManager.EmpezarLobby` loads `res://Escenas/lobby_2d.tscn`, which no longer exists.
 - Roll flow that works: `Mundo.tscn` → `HUD/PanelAcciones` button → `GameManager.tirarDado()` → signal `simular_dado` → `dado._tirar()`. `Escenas/UI/UI.tscn` / `ui.gd` is a dead copy of this: it looks for `$HUD/PanelAcciones` (not in that scene) and calls a nonexistent `solicitar_tirar_dado`.
-- Camera sequence in `mundo.gd`: on `simular_dado`, the camera moves to `vistaMesaDados` (only the marker's position is used; the camera keeps its downward rotation). On `tiro_finalizado`, it waits `pausa_resultado`, returns to its saved transform, and only then calls `GameManager.moverFicha` to move the piece of `turnoEquipoId`. `GameManager.conectar_dado` is unused. `avanzarTurno` is never called, so the same team keeps moving.
+- Camera sequence in `mundo.gd`: on `simular_dado`, the camera moves to `vistaMesaDados` (only the marker's position is used; the camera keeps its downward rotation). On `tiro_finalizado`, it waits `pausa_resultado`, returns to its saved transform, and only then calls `GameManager.moverFicha` to move the piece of `turnoEquipoId`. `GameManager.conectar_dado` is unused.
+- Turn timer: `Mundo.tscn` instances `Escenas/temporizador.tscn` (60 s, no autostart). When `moverFicha`'s tween ends, `GameManager` emits `ficha_movida`, and `mundo.gd` calls `temporizador.iniciar()`, which only starts the timer if it is stopped. Its `tiempo_agotado` signal calls `GameManager.avanzarTurno()`, which switches `turnoEquipoId` and emits `turno_equipo_cambiado`. `mundo.gd` then calls `temporizador.reiniciar()`. A roll is not blocked while the timer runs, and nothing stops a roll that is in progress when time runs out.
 - When `Mundo.tscn` runs directly (F6), with no lobby, `mundo.gd` creates two test pieces.
-- `avanzarTurno` uses `==` where it means `=`.
-- `Escenas/main.tscn` (the main scene) also instances `gameManager.tscn`, so a second `GameManager` node exists alongside the autoload. That node runs its own `_ready`, which also calls `EmpezarLobby`.
+- `Escenas/main.tscn` (the main scene) also instances `gameManager.tscn`, so a second `GameManager` node exists alongside the autoload. That node runs its own `_ready`, which also calls `EmpezarLobby`. It also instances the dead `Escenas/UI/UI.tscn`.
 
 ## Relay server (`server/server.js`)
 
 - **Phones** load `server/public/index.html` and open a WebSocket to `/ws`.
 - **Godot** connects to `/host` (`ws://127.0.0.1:3000/host`, hardcoded in `Scripts/hub_client.gd`). The upgrade handler rejects `/host` from any non-loopback address. Only one host connects at a time; a new host connection closes the previous one.
-- The server owns the player roster (`players` Map, in memory only) and enforces the join rules: name ≤16 chars, team 1 or 2, and `MAX_PER_TEAM` = 20. Game logic belongs in Godot. Apart from managing the roster, the server only relays messages.
+- The server owns the player roster (`players` Map, in memory only) and enforces the join rules: the name must be non-empty and is silently truncated to 16 chars, the team must be 1 or 2, and `MAX_PER_TEAM` = 20. Game logic belongs in Godot. Apart from managing the roster, the server only relays messages.
 
 ### Message protocol (JSON, `type` field)
 
@@ -58,7 +58,7 @@ When changing the protocol, update all three ends: `server/server.js`, `server/p
 
 ### Reconnects
 
-The phone stores its `{id, name, team}` in localStorage and re-sends `join` with that `id` on reconnect. If the id (12 hex chars) is already in the roster, the server swaps in the new socket and replies `joined` *without* notifying Godot, so page reloads are invisible to the game. A player is removed (and `player_left` sent) only on an explicit `leave`, or when their current socket closes.
+The phone stores its `{id, name, team}` in localStorage and re-sends `join` with that `id` on reconnect. If the id (12 hex chars) is already in the roster, the server swaps in the new socket, keeps the stored name and team (it ignores the ones sent), and replies `joined` *without* notifying Godot, so page reloads are invisible to the game. A player is removed (and `player_left` sent) only on an explicit `leave`, or when their current socket closes.
 
 ### Godot side of the connection
 
