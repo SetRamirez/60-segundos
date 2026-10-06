@@ -1,0 +1,13 @@
+{
+  "name": "60-segundos-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Servidor local: sirve la página de los celulares y reenvía mensajes a Godot",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "ws": "^8.18.0"
+  }
+}

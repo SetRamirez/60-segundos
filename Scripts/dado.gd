@@ -4,18 +4,22 @@ extends RigidBody3D
 
 var pos_inicial
 var fuerza_tiro = 30
+var lanzando := false  # evita emitir un resultado cuando el dado se duerme sin haber sido tirado
 
 signal tiro_finalizado(valor)
 
 
 func _ready():
-	GameManager.tirar_dado.connect(_tirar)
+	GameManager.simular_dado.connect(_tirar)
 	pos_inicial = global_position
 
 func _simular_dado():
 	_tirar()
 
 func _tirar():
+	if lanzando:
+		return
+	lanzando = true
 	sleeping = false
 	freeze = false
 	transform.origin = pos_inicial
@@ -32,7 +36,9 @@ func _tirar():
 
 
 func _on_sleeping_state_changed() -> void:
-	if sleeping:
+	if sleeping and lanzando:
 		for raycast in raycasts:
 			if raycast.is_colliding():
+				lanzando = false
 				tiro_finalizado.emit(raycast.opposite_side)
+				return

@@ -13,4 +13,4 @@ func configurar_estado(puedeTirar: bool) -> void:
 
 
 func _on_boton_tirar_dado_pressed() -> void:
-	GameManager.tirarDados()
+	GameManager.tirarDado()

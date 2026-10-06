@@ -1,7 +1,7 @@
 extends Node
 # GameManager.gd
 #var jugadores: Array = []
-const NUMERO_CASILLAS = 62
+const NUMERO_CASILLAS = 61  # casillas del Path3D de Mundo.tscn, incluida la de salida
 var turno_actual: int = 0
 var turnoEquipoId: int;
 var equipos = {}
@@ -28,8 +28,8 @@ func _procesarFichasPendientes():
 	for datos in colaFichasPendientes:
 		_crearFicha(datos[0], datos[1])
 	colaFichasPendientes.clear()
-	verificarMismaCasillaFinal()
-	print(equipos["equipo1"])
+	if path_3D.get_child_count() >= 2:
+		verificarMismaCasillaFinal()
 
 func instanciarFicha(nombre: String, id: int):
 	if path_3D == null:
@@ -72,22 +72,24 @@ func _on_dado_tiro_finalizado(resultado: int) -> void:
 	moverFicha(resultado)
 	
 func moverFicha(casillas: int) ->void:
-	var pathFollow = equipos["equipo%s" %turnoEquipoId].pathFicha
-	
+	var equipo = equipos.get("equipo%s" % turnoEquipoId)
+	if equipo == null:
+		push_error("No hay ficha para el equipo %s" % turnoEquipoId)
+		return
+
+	# La casilla 0 es la salida; el camino tiene NUMERO_CASILLAS - 1 tramos iguales.
 	var largoTotal := path_3D.curve.get_baked_length()
-	var distanciaPorCasilla := largoTotal / float(NUMERO_CASILLAS)
-	
-	var progressDestino = pathFollow.progress + (distanciaPorCasilla * casillas)
-	progressDestino = min(progressDestino, largoTotal)  
+	var distanciaPorCasilla := largoTotal / float(NUMERO_CASILLAS - 1)
+
 	# evita pasarse del final, arreglar despues para que avanze hasta el final y vuelva
-	
+	equipo.posicion = mini(equipo.posicion + casillas, NUMERO_CASILLAS - 1)
+
 	var tween := create_tween()
 	tween.tween_property(
-		pathFollow, "progress",
-		progressDestino,
+		equipo.pathFicha, "progress",
+		equipo.posicion * distanciaPorCasilla,
 		0.8
 	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	equipos["equipo%s" %turnoEquipoId].posicion=+casillas
 	
 func verificarMismaCasillaFinal():
 	var pathEquipo1 = path_3D.get_child(0)

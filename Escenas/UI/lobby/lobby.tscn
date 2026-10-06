@@ -1,6 +1,13 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://clufmqexlypwr"]
 
 [ext_resource type="PackedScene" path="res://Escenas/UI/lobby/team_panel.tscn" id="1_team"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nvdeo"]
+bg_color = Color(0.92968196, 0.79805464, 0.43607983, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
 
 [sub_resource type="StyleBoxFlat" id="Style_button"]
 content_margin_left = 72.0
@@ -11,7 +18,7 @@ corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
-[node name="Lobby" type="Control"]
+[node name="Lobby" type="Control" unique_id=1588417391]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -19,7 +26,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=203092853]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -28,7 +35,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.957, 0.945, 0.98, 1)
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="." unique_id=920408271]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -40,52 +47,50 @@ theme_override_constants/margin_top = 40
 theme_override_constants/margin_right = 56
 theme_override_constants/margin_bottom = 40
 
-[node name="Main" type="VBoxContainer" parent="Margin"]
+[node name="Main" type="VBoxContainer" parent="Margin" unique_id=2140645361]
 layout_mode = 2
 theme_override_constants/separation = 28
 
-[node name="Title" type="Label" parent="Margin/Main"]
+[node name="Title" type="Label" parent="Margin/Main" unique_id=1627419347]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.169, 0.165, 0.227, 1)
 theme_override_font_sizes/font_size = 56
 text = "Lobby"
 
-[node name="Teams" type="HBoxContainer" parent="Margin/Main"]
+[node name="Teams" type="HBoxContainer" parent="Margin/Main" unique_id=960667655]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 24
 
-[node name="Team1" parent="Margin/Main/Teams" instance=ExtResource("1_team")]
+[node name="Team1" parent="Margin/Main/Teams" unique_id=46279364 instance=ExtResource("1_team")]
 layout_mode = 2
-team_number = 1
 panel_color = Color(0.486, 0.655, 0.647, 1)
 
-[node name="Versus" type="Label" parent="Margin/Main/Teams"]
+[node name="Versus" type="Label" parent="Margin/Main/Teams" unique_id=647328076]
 layout_mode = 2
-size_flags_vertical = 4
 theme_override_colors/font_color = Color(0.42, 0.408, 0.502, 1)
 theme_override_font_sizes/font_size = 28
 text = "VS"
 
-[node name="Team2" parent="Margin/Main/Teams" instance=ExtResource("1_team")]
+[node name="Team2" parent="Margin/Main/Teams" unique_id=627111755 instance=ExtResource("1_team")]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_nvdeo")
 team_number = 2
-panel_color = Color(0.859, 0.706, 0.302, 0.8)
 
-[node name="Footer" type="CenterContainer" parent="Margin/Main"]
+[node name="Footer" type="CenterContainer" parent="Margin/Main" unique_id=1438155061]
 custom_minimum_size = Vector2(0, 68)
 layout_mode = 2
 
-[node name="StartButton" type="Button" parent="Margin/Main/Footer"]
+[node name="StartButton" type="Button" parent="Margin/Main/Footer" unique_id=2073273817]
 custom_minimum_size = Vector2(0, 68)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("Style_button")
-theme_override_styles/hover = SubResource("Style_button")
 theme_override_styles/pressed = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button")
 theme_override_styles/focus = SubResource("Style_button")
 text = "Comenzar juego"

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>60 segundos</title>
+<style>
+:root{--bg:#f4f1fa;--ink:#2b2a3a;--mute:#6b6880;--t1:#7ca7a5;--t2:#dbb44d}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+main{width:100%;max-width:380px}
+h1{font-size:2.4rem;font-weight:800;letter-spacing:-.02em;margin:0 0 4px}
+p{color:var(--mute);margin:0 0 20px}
+label{display:block;font-weight:600;margin-bottom:14px}
+input,select,button{width:100%;font:inherit;border-radius:14px;padding:14px 16px;margin-top:6px}
+input,select{border:2px solid var(--mute);background:#fff;color:var(--ink)}
+button{border:0;background:var(--ink);color:#fff;font-weight:800;font-size:1.1rem;cursor:pointer;margin-top:8px}
+button.ghost{background:transparent;color:var(--mute);font-weight:600;font-size:1rem}
+#err{color:#b3261e;min-height:1.4em;margin:8px 0 0}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 14px}
+.team{margin:0;color:var(--ink);border:3px solid transparent}
+.team.t1{background:var(--t1)}.team.t2{background:var(--t2)}
+.team.on{border-color:var(--ink)}
+.team:disabled{opacity:.45;cursor:not-allowed}
+.team small{display:block;font-weight:600;font-size:.85rem}
+.lbl{font-weight:600}
+.badge{display:inline-block;padding:6px 14px;border-radius:999px;font-weight:800;color:var(--ink);margin-bottom:12px}
+#status{position:fixed;top:10px;right:12px;font-size:.8rem;color:var(--mute)}
+[hidden]{display:none!important}
+</style></head>
+<body>
+<div id="status">Conectando…</div>
+<main>
+  <section id="join">
+    <h1>60 segundos</h1>
+    <p>Escribe tu nombre para unirte a la partida.</p>
+    <label>Tu nombre<input id="name" maxlength="16" autocomplete="off"></label>
+    <div class="lbl">Elige tu equipo</div>
+    <div class="teams"><button type="button" class="team t1" data-team="1">Equipo 1<small id="c1"></small></button><button type="button" class="team t2" data-team="2">Equipo 2<small id="c2"></small></button></div>
+    <button id="go">Unirme</button>
+    <p id="err" role="alert"></p>
+  </section>
+  <section id="wait" hidden>
+    <span id="badge" class="badge"></span>
+    <h1 id="who"></h1>
+    <p>Ya estás dentro. Esperando a que empiece el juego…</p>
+    <button id="leave" class="ghost">Cambiar nombre o equipo</button>
+  </section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const KEY = '60s-jugador';
+let saved = null;
+try { saved = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch (e) {}
+let ws, team = 0;
+
+function connect() {
+  ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws');
+  ws.onopen = () => {
+    $('status').textContent = 'Conectado';
+    if (saved) send({ type: 'join', ...saved });
+  };
+  ws.onclose = () => { $('status').textContent = 'Reconectando…'; setTimeout(connect, 1500); };
+  ws.onmessage = e => handle(JSON.parse(e.data));
+}
+const send = obj => { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj)); };
+
+function show(joined) { $('join').hidden = joined; $('wait').hidden = !joined; }
+
+function handle(m) {
+  if (m.type === 'joined') {
+    saved = { id: m.id, name: m.name, team: m.team };
+    try { sessionStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+    $('who').textContent = m.name;
+    $('badge').textContent = 'Equipo ' + m.team;
+    $('badge').style.background = m.team === 1 ? 'var(--t1)' : 'var(--t2)';
+    show(true);
+  } else if (m.type === 'counts') {
+    [1, 2].forEach(t => {
+      const b = document.querySelector('.team[data-team="' + t + '"]');
+      $('c' + t).textContent = m.teams[t] + ' / ' + m.max + ' jugadores';
+      b.disabled = m.teams[t] >= m.max;
+      if (b.disabled && team === t) { team = 0; b.classList.remove('on'); }
+    });
+  } else if (m.type === 'left') {
+    saved = null;
+    try { sessionStorage.removeItem(KEY); } catch (e) {}
+    show(false);
+  } else if (m.type === 'error') {
+    saved = null;
+    try { sessionStorage.removeItem(KEY); } catch (e) {}
+    show(false);
+    $('err').textContent = m.message;
+  }
+  // Los mensajes de turno, dados y cartas se manejarán aquí más adelante.
+}
+
+$('go').onclick = () => {
+  $('err').textContent = '';
+  if (!team) { $('err').textContent = 'Elige un equipo.'; return; }
+  send({ type: 'join', name: $('name').value, team, id: saved && saved.id });
+};
+document.querySelectorAll('.team').forEach(b => b.onclick = () => {
+  team = Number(b.dataset.team);
+  document.querySelectorAll('.team').forEach(x => x.classList.toggle('on', x === b));
+});
+$('leave').onclick = () => send({ type: 'leave' });
+connect();
+</script>
+</body></html>
