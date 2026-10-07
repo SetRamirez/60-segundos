@@ -63,6 +63,13 @@ transform = Transform3D(8, 6.9938227e-07, 6.9938216e-07, -6.993822e-07, 3.496910
 text = "0
 "
 
+[node name="mensajeGanador" type="Label3D" parent="."]
+visible = false
+transform = Transform3D(8, 6.9938227e-07, 6.9938216e-07, -6.993822e-07, 3.4969105e-07, 8, 6.993822e-07, -8, 3.496911e-07, 0, 1, 0)
+no_depth_test = true
+outline_size = 24
+text = "¡Gana!"
+
 [node name="posicionCamaras" type="Node3D" parent="." unique_id=1464834906]
 
 [node name="vistaTableroGral" type="Marker3D" parent="posicionCamaras" unique_id=1294141954]

@@ -26,7 +26,7 @@
 ### Flujo de un turno
 Aviso de turno (`PanelAcciones` centrado con "Turno de X") → botón → `GameManager.tirarDado()` → `simular_dado` (el panel se oculta) → la cámara va a la mesa y el dado rueda → `tiro_finalizado` → la cámara vuelve → `GameManager.moverFicha()` → `ficha_movida` → `Temporizador.iniciar()` (solo si estaba parado) y el panel vuelve para poder tirar otra vez → `tiempo_agotado` → `GameManager.avanzarTurno()` → `turno_equipo_cambiado` → `Temporizador.reiniciar()` y aviso del nuevo equipo.
 
-Para ganar hay que caer **exacto** en la última casilla. Si el dado da de más, `moverFicha` lleva la ficha hasta el final y la hace retroceder las casillas que se pasó. Al caer exacto se emite `partida_terminada` en lugar de `ficha_movida`, y `mundo.gd` para el reloj, oculta el panel y muestra al ganador.
+Para ganar hay que caer **exacto** en la última casilla. Si el dado da de más, `moverFicha` lleva la ficha hasta el final y la hace retroceder las casillas que se pasó. Al caer exacto se emite `partida_terminada` en lugar de `ficha_movida`, y `mundo.gd` para el reloj, oculta el panel y muestra al ganador en `mensajeGanador`, un `Label3D` en el centro del tablero.
 
 Solo se avanza dentro del minuto del turno. Si el reloj se agota durante una tirada, el turno cambia en ese momento y la tirada no cuenta: `mundo.gd` compara `GameManager.turno_actual` con el de cuando se pulsó tirar y no llama a `moverFicha`. El aviso del nuevo equipo espera a que termine la tirada descartada. Si la ficha ya estaba en movimiento, termina de moverse pero no arranca el reloj.
 

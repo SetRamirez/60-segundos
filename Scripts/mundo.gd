@@ -6,6 +6,7 @@ extends Node3D
 @onready var vistaMesaDados = $posicionCamaras/vistaMesaDados
 
 @onready var resultado_dado = $"resultado-dado"
+@onready var mensajeGanador = $mensajeGanador  # Label3D en el centro del tablero
 
 @onready var path_3D = $Path3D
 @onready var dado = $Dado
@@ -80,7 +81,8 @@ func _on_ficha_movida(equipoId: int) -> void:
 func _on_partida_terminada(equipoId: int) -> void:
 	temporizador.reiniciar()
 	panelAcciones.hide()
-	resultado_dado.text = "¡Gana %s!" % GameManager.equipos["equipo%s" % equipoId].nombre
+	mensajeGanador.text = "¡Gana %s!" % GameManager.equipos["equipo%s" % equipoId].nombre
+	mensajeGanador.show()
 
 func mover_camara_a(destino: Transform3D, duracion := 0.6) -> Tween:
 	var tween = create_tween()
