@@ -7,29 +7,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Godot corre en el PC anfitrión, en la pantalla grande. Los jugadores se unen desde el celular por la LAN.
 - Servidor: `cd server && npm install && npm start` (escucha en `0.0.0.0:3000`; se cambia con `PORT=...`). No hay tests, linter ni build. `server/public/` se sirve tal cual.
-- F5 (escena principal) está roto: `GameManager.EmpezarLobby` carga `res://Escenas/lobby_2d.tscn`, que ya no existe. Para probar el tablero, abre `Escenas/Mundo.tscn` y pulsa F6; sin lobby, `mundo.gd` crea dos fichas de prueba.
+- F5 abre el lobby (`Escenas/UI/lobby/lobby.tscn`, la escena principal). Con el servidor encendido muestra la URL y los jugadores; sin servidor dice "Conectando con el servidor…", pero "Comenzar juego" funciona igual. Para probar solo el tablero, abre `Escenas/Mundo.tscn` y pulsa F6: sin lobby, `mundo.gd` crea dos equipos de prueba.
 
 ## Idioma
 - Responde siempre en español.
-- Mantén en español los nombres que ya existen en el código (`colaFichasPendientes`, `PanelAcciones`, `turnoEquipoId`, `moverFicha`, etc.) y sigue esa convención al crear nombres nuevos.
+- Mantén en español los nombres que ya existen en el código (`PanelAcciones`, `turnoEquipoId`, `moverFicha`, etc.) y sigue esa convención al crear nombres nuevos.
 
 ## Arquitectura (respétala)
-- **Autoload `GameManager`** (`Scripts/GameManager.gd`): guarda el estado de la partida (equipos, `turnoEquipoId`) y cambia de escena. Avisa a las escenas mediante señales: `simular_dado`, `ficha_movida`, `turno_equipo_cambiado`.
-- **`Hub`** (`Scripts/hub_client.gd`): el cliente WebSocket hacia el servidor. Va a ser un autoload, pero **todavía no está registrado** en `project.godot`.
+- **Autoload `GameManager`** (`Scripts/GameManager.gd`): guarda el estado y las reglas de la partida, y cambia de escena. **Solo datos, nunca nodos**: un autoload vive todo el juego, pero los nodos de una escena se destruyen al cambiar de escena. `equipos` es `{id: {nombre, posicion}}` (clave `int`, 1 o 2; `posicion` es la casilla). Avisa a las escenas mediante señales: `simular_dado`, `ficha_movida`, `turno_equipo_cambiado`.
+- **Autoload `Hub`** (`Scripts/hub_client.gd`): el cliente WebSocket hacia el servidor. Se reconecta solo cada 2 s y sigue conectado al pasar del lobby a `Mundo`. Señales: `connection_changed`, `url_received`, `roster_received`, `player_joined`, `player_left`, `player_message`.
+- **Lobby** (`Escenas/UI/lobby/lobby.tscn` + `lobby.gd`, con dos `TeamPanel`): muestra los jugadores de `Hub`. "Comenzar juego" → `GameManager.recibirDatos(nombre1, nombre2)` (usa `TeamPanel.nombre_equipo()`) → `crearEquipos` + `iniciar_partida` → `Mundo.tscn`.
 - **`Mundo.tscn` / `mundo.gd`** maneja lo visual en 3D: la cámara, el dado (`dado.gd`), el `Path3D` del tablero y la secuencia del tiro.
 - La UI son `CanvasLayer`s dentro de `Mundo.tscn`: `HUD/PanelAcciones` (el botón de tirar) y `Temporizador` (60 s).
-- Cada ficha es `Escenas/equipo.tscn`, con el script `Scripts/jugador.gd` (`class_name Equipo`, aunque el archivo se llame "jugador"). Guarda `id`, `nombre`, `posicion` (la casilla) y `pathFicha`. `GameManager.equipos` las indexa como `"equipo<id>"`.
+- Cada ficha es `Escenas/equipo.tscn`, con el script `Scripts/jugador.gd` (`class_name Equipo`, aunque el archivo se llame "jugador"). Guarda `id`, `nombre` y `pathFicha`; la casilla no está en la ficha, sino en `GameManager.equipos`.
+- **`Scripts/tablero.gd`** (en el nodo `Path3D` de `Mundo.tscn`) es el dueño de las fichas: `crearFichas()` (lo llama `mundo.gd` en su `_ready`, después de crear los equipos de prueba si hace falta), `animarFicha(movimiento)` y `actualizarOffsets()`.
 - Las fichas se mueven con `PathFollow3D`. La distancia por casilla es la longitud baked de la curva dividida entre `NUMERO_CASILLAS - 1`. `NUMERO_CASILLAS` (61, incluida la salida) está en `GameManager.gd`. Si cambias la textura del tablero, hay que redibujar la curva y actualizar `NUMERO_CASILLAS`.
-- `colaFichasPendientes` guarda las fichas pedidas antes de que exista el `Path3D`, para evitar problemas de timing entre los datos del lobby y la escena lista.
-- Cuando dos fichas comparten casilla, `actualizarOffsets()` las separa con `h_offset`.
+- Cuando dos fichas comparten casilla, `tablero.actualizarOffsets()` las separa con `h_offset`.
 - Usa `call_deferred` cuando haya errores de árbol ocupado en los cambios de escena.
 - Muchas conexiones de señales están en los `.tscn`, no en el código (busca `[connection` en `Escenas/`).
 - Si un cambio rompe alguno de estos patrones, avísame antes de hacerlo y explica por qué.
 
 ### Flujo de un turno
-Aviso de turno (`PanelAcciones` centrado con "Turno de X") → botón → `GameManager.tirarDado()` → `simular_dado` (el panel se oculta) → la cámara va a la mesa y el dado rueda → `tiro_finalizado` → la cámara vuelve → `GameManager.moverFicha()` → `ficha_movida` → `Temporizador.iniciar()` (solo si estaba parado) y el panel vuelve para poder tirar otra vez → `tiempo_agotado` → `GameManager.avanzarTurno()` → `turno_equipo_cambiado` → `Temporizador.reiniciar()` y aviso del nuevo equipo.
+Aviso de turno (`PanelAcciones` centrado con "Turno de X") → botón → `GameManager.tirarDado()` → `simular_dado` (el panel se oculta) → la cámara va a la mesa y el dado rueda → `tiro_finalizado` → la cámara vuelve → `GameManager.moverFicha()` (actualiza la casilla y devuelve `{id, inicio, tope, final}`) → `tablero.animarFicha()` → al terminar el Tween, `GameManager.terminarMovimiento()` → `ficha_movida` → `Temporizador.iniciar()` (solo si estaba parado) y el panel vuelve para poder tirar otra vez → `tiempo_agotado` → `GameManager.avanzarTurno()` → `turno_equipo_cambiado` → `Temporizador.reiniciar()` y aviso del nuevo equipo.
 
-Para ganar hay que caer **exacto** en la última casilla. Si el dado da de más, `moverFicha` lleva la ficha hasta el final y la hace retroceder las casillas que se pasó. Al caer exacto se emite `partida_terminada` en lugar de `ficha_movida`, y `mundo.gd` para el reloj, oculta el panel y muestra al ganador en `mensajeGanador`, un `Label3D` en el centro del tablero.
+Para ganar hay que caer **exacto** en la última casilla. Si el dado da de más, `moverFicha` calcula el rebote (`tope` = última casilla, `final` = la casilla tras retroceder lo que se pasó) y `animarFicha` hace los dos tramos. Al caer exacto se emite `partida_terminada` en lugar de `ficha_movida`, y `mundo.gd` para el reloj, oculta el panel y muestra al ganador en `mensajeGanador`, un `Label3D` en el centro del tablero.
 
 Solo se avanza dentro del minuto del turno. Si el reloj se agota durante una tirada, el turno cambia en ese momento y la tirada no cuenta: `mundo.gd` compara `GameManager.turno_actual` con el de cuando se pulsó tirar y no llama a `moverFicha`. El aviso del nuevo equipo espera a que termine la tirada descartada. Si la ficha ya estaba en movimiento, termina de moverse pero no arranca el reloj.
 
@@ -46,8 +47,7 @@ Solo se avanza dentro del minuto del turno. Si el reloj se agota durante una tir
 - Si cambias el protocolo, hay que tocar los tres lados: `server/server.js`, `server/public/index.html` y `Scripts/hub_client.gd`.
 
 ### Cabos sueltos conocidos
-- El lobby no está terminado: `Escenas/UI/lobby/lobby.tscn` no tiene script y `Scripts/lobby.tscn` es una copia con rutas rotas.
-- `Escenas/main.tscn` (la escena principal) es un `Node` vacío. No metas `GameManager` en una escena: es un autoload, y otra instancia duplicaría su estado y su `_ready()`.
+- `Escenas/gameManager.tscn` existe, pero no se instancia en ninguna parte. No metas `GameManager` ni `Hub` en una escena: son autoloads, y otra instancia duplicaría su estado (y, en `Hub`, abriría una segunda conexión de host).
 
 ## Cómo explicarme los cambios
 Estoy aprendiendo, así que explica lo que haces:

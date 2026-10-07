@@ -4,9 +4,11 @@ extends Control
 @onready var _team_1: TeamPanel = $Margin/Main/Teams/Team1
 @onready var _team_2: TeamPanel = $Margin/Main/Teams/Team2
 @onready var _join_url: Label = $Margin/Main/TitleRow/JoinUrl
+@onready var _start_button: Button = $Margin/Main/Footer/StartButton
 
 
 func _ready() -> void:
+	_start_button.pressed.connect(_on_start_pressed)
 	Hub.url_received.connect(_on_url)
 	Hub.player_joined.connect(_on_player_joined)
 	Hub.player_left.connect(_on_player_left)
@@ -45,3 +47,8 @@ func _on_player_joined(id: String, player_name: String, team: int) -> void:
 func _on_player_left(id: String) -> void:
 	_team_1.remove_player(id)
 	_team_2.remove_player(id)
+
+
+# Crea los equipos en GameManager y cambia a Mundo.tscn.
+func _on_start_pressed() -> void:
+	GameManager.recibirDatos(_team_1.nombre_equipo(), _team_2.nombre_equipo())

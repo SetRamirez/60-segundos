@@ -47,6 +47,12 @@ func remove_player(id: String) -> void:
 		_refresh()
 
 
+## Nombre escrito en el campo del equipo, o "Equipo N" si está vacío.
+func nombre_equipo() -> String:
+	var nombre := _team_input.text.strip_edges()
+	return nombre if not nombre.is_empty() else "Equipo %d" % team_number
+
+
 func clear_players() -> void:
 	_ids.clear()
 	_names.clear()

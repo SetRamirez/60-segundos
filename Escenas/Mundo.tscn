@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://b64a8nma5h374" path="res://Escenas/dado.tscn" id="4_htlm0"]
 [ext_resource type="PackedScene" uid="uid://dgr3ynvglke2g" path="res://Escenas/panelAcciones.tscn" id="5_panel"]
 [ext_resource type="PackedScene" uid="uid://06qg0jb36wsu" path="res://Escenas/temporizador.tscn" id="6_tempo"]
+[ext_resource type="Script" path="res://Scripts/tablero.gd" id="7_tablero"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_g3dvk"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -51,6 +52,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_v0s4m")
 
 [node name="Path3D" type="Path3D" parent="." unique_id=1647209381]
 curve = SubResource("Curve3D_tablero")
+script = ExtResource("7_tablero")
 
 [node name="mesa_dados" parent="." unique_id=1692459830 instance=ExtResource("3_nhmaw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.25014, 0, -0.22614002)

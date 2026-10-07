@@ -8,7 +8,7 @@ extends Node3D
 @onready var resultado_dado = $"resultado-dado"
 @onready var mensajeGanador = $mensajeGanador  # Label3D en el centro del tablero
 
-@onready var path_3D = $Path3D
+@onready var tablero = $Path3D  # tablero.gd: crea y anima las fichas
 @onready var dado = $Dado
 @onready var temporizador = $Temporizador
 @onready var panelAcciones = $HUD/PanelAcciones
@@ -23,15 +23,15 @@ var _turno_de_tirada := 0  # GameManager.turno_actual cuando se pulsó tirar
 
 
 func _ready():
-	GameManager.registarPath(path_3D)
 	GameManager.simular_dado.connect(_on_simular_dado)
 	GameManager.ficha_movida.connect(_on_ficha_movida)
-	# Al ejecutar Mundo.tscn directamente (F6) no se pasa por el lobby: crea fichas de prueba.
+	# Al ejecutar Mundo.tscn directamente (F6) no se pasa por el lobby: crea equipos de prueba.
 	if GameManager.equipos.is_empty():
-		GameManager.instanciarFicha("Equipo 1", 1)
-		GameManager.instanciarFicha("Equipo 2", 2)
-		GameManager.actualizarOffsets()
+		GameManager.crearEquipos(["Equipo 1", "Equipo 2"])
 		GameManager.turnoEquipoId = randi_range(1, 2)
+	# Se llama desde aquí y no desde el _ready del tablero: los hijos ejecutan _ready antes
+	# que el padre, y el tablero aún no vería los equipos de prueba.
+	tablero.crearFichas()
 	GameManager.turno_equipo_cambiado.connect(_on_turno_equipo_cambiado)
 	temporizador.tiempo_agotado.connect(GameManager.avanzarTurno)
 	GameManager.partida_terminada.connect(_on_partida_terminada)
@@ -39,7 +39,7 @@ func _ready():
 
 # Aviso de inicio de turno: el panel centrado con el equipo que juega y el botón de tirar.
 func _mostrar_turno() -> void:
-	var nombre: String = GameManager.equipos["equipo%s" % GameManager.turnoEquipoId].nombre
+	var nombre: String = GameManager.equipos[GameManager.turnoEquipoId].nombre
 	panelAcciones.mostrar_turno(nombre)
 
 func _on_simular_dado() -> void:
@@ -66,7 +66,12 @@ func _on_dado_tiro_finalizado(valor: Variant) -> void:
 		_mostrar_turno()  # el aviso del nuevo equipo quedó pendiente
 		return
 	# La ficha avanza cuando la cámara ya volvió al tablero, para que se vea el movimiento.
-	GameManager.moverFicha(valor)
+	var movimiento := GameManager.moverFicha(valor)
+	if movimiento.is_empty():
+		_tirada_en_curso = false
+		return
+	await tablero.animarFicha(movimiento).finished
+	GameManager.terminarMovimiento(movimiento.id)
 
 # El tiempo del turno empieza cuando la ficha termina su primer movimiento.
 # Después de moverse, el panel vuelve para que el equipo pueda tirar otra vez en su turno.
@@ -81,7 +86,7 @@ func _on_ficha_movida(equipoId: int) -> void:
 func _on_partida_terminada(equipoId: int) -> void:
 	temporizador.reiniciar()
 	panelAcciones.hide()
-	mensajeGanador.text = "¡Gana %s!" % GameManager.equipos["equipo%s" % equipoId].nombre
+	mensajeGanador.text = "¡Gana %s!" % GameManager.equipos[equipoId].nombre
 	mensajeGanador.show()
 
 func mover_camara_a(destino: Transform3D, duracion := 0.6) -> Tween:

@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://clufmqexlypwr"]
 
 [ext_resource type="PackedScene" path="res://Escenas/UI/lobby/team_panel.tscn" id="1_team"]
+[ext_resource type="Script" uid="uid://4aax3w7ue6pt" path="res://Scripts/lobby.gd" id="2_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nvdeo"]
 bg_color = Color(0.92968196, 0.79805464, 0.43607983, 1)
@@ -25,6 +26,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("2_script")
 
 [node name="Background" type="ColorRect" parent="." unique_id=203092853]
 layout_mode = 1
@@ -51,11 +53,23 @@ theme_override_constants/margin_bottom = 40
 layout_mode = 2
 theme_override_constants/separation = 28
 
-[node name="Title" type="Label" parent="Margin/Main" unique_id=1627419347]
+[node name="TitleRow" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
+
+[node name="Title" type="Label" parent="Margin/Main/TitleRow" unique_id=1627419347]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.169, 0.165, 0.227, 1)
 theme_override_font_sizes/font_size = 56
 text = "Lobby"
+
+[node name="JoinUrl" type="Label" parent="Margin/Main/TitleRow"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.29, 0.282, 0.376, 1)
+theme_override_font_sizes/font_size = 22
+text = "Conectando con el servidor…"
+horizontal_alignment = 2
 
 [node name="Teams" type="HBoxContainer" parent="Margin/Main" unique_id=960667655]
 layout_mode = 2

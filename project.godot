@@ -11,12 +11,13 @@ config_version=5
 [application]
 
 config/name="60_segundos"
-run/main_scene="uid://c3dtxu1tu0hvb"
+run/main_scene="uid://clufmqexlypwr"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
 
 GameManager="*uid://c2wqcgynqrsl7"
+Hub="*uid://6p3rgwolm47i"
 
 [display]
 
