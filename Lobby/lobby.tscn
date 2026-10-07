@@ -89,7 +89,7 @@ text = "VS"
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_nvdeo")
 team_number = 2
-panel_color = Color(0.83466023, 0.78535753, 0.8952961, 1)
+panel_color = Color(0.91888946, 0.8057672, 0.3325848, 1)
 
 [node name="Footer" type="CenterContainer" parent="Margin/Main" unique_id=1438155061]
 custom_minimum_size = Vector2(0, 68)
