@@ -1,7 +1,9 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Proyecto
-"60 segundos": juego de mesa 3D de preguntas por equipos (estilo Jackbox), hecho en **Godot 4.7**, con un servidor relay en **Node.js + `ws`** (WebSocket plano, no Socket.io). Hay cuatro categorías de preguntas. En su turno, cada equipo tiene 60 segundos para responder todas las que pueda, y gana el primero que llega al final del tablero.
+"60 segundos": juego de mesa 3D de preguntas por equipos (estilo Jackbox), hecho en **Godot 4.7**, con un servidor relay en **Node.js + `ws`** (WebSocket plano, no Socket.io; Express solo sirve `server/public/`). Hay cuatro categorías de preguntas. En su turno, cada equipo tiene 60 segundos para responder todas las que pueda, y gana el primero que llega al final del tablero.
 
 - Godot corre en el PC anfitrión, en la pantalla grande. Los jugadores se unen desde el celular por la LAN.
 - Servidor: `cd server && npm install && npm start` (escucha en `0.0.0.0:3000`; se cambia con `PORT=...`). No hay tests, linter ni build. `server/public/` se sirve tal cual.
@@ -16,7 +18,8 @@
 - **`Hub`** (`Scripts/hub_client.gd`): el cliente WebSocket hacia el servidor. Va a ser un autoload, pero **todavía no está registrado** en `project.godot`.
 - **`Mundo.tscn` / `mundo.gd`** maneja lo visual en 3D: la cámara, el dado (`dado.gd`), el `Path3D` del tablero y la secuencia del tiro.
 - La UI son `CanvasLayer`s dentro de `Mundo.tscn`: `HUD/PanelAcciones` (el botón de tirar) y `Temporizador` (60 s).
-- Las fichas se mueven con `PathFollow3D`. La distancia por casilla es la longitud baked de la curva dividida entre `NUMERO_CASILLAS - 1`. Si cambias la textura del tablero, hay que redibujar la curva y actualizar `NUMERO_CASILLAS`.
+- Cada ficha es `Escenas/equipo.tscn`, con el script `Scripts/jugador.gd` (`class_name Equipo`, aunque el archivo se llame "jugador"). Guarda `id`, `nombre`, `posicion` (la casilla) y `pathFicha`. `GameManager.equipos` las indexa como `"equipo<id>"`.
+- Las fichas se mueven con `PathFollow3D`. La distancia por casilla es la longitud baked de la curva dividida entre `NUMERO_CASILLAS - 1`. `NUMERO_CASILLAS` (61, incluida la salida) está en `GameManager.gd`. Si cambias la textura del tablero, hay que redibujar la curva y actualizar `NUMERO_CASILLAS`.
 - `colaFichasPendientes` guarda las fichas pedidas antes de que exista el `Path3D`, para evitar problemas de timing entre los datos del lobby y la escena lista.
 - Cuando dos fichas comparten casilla, `actualizarOffsets()` las separa con `h_offset`.
 - Usa `call_deferred` cuando haya errores de árbol ocupado en los cambios de escena.
@@ -37,13 +40,15 @@ Solo se avanza dentro del minuto del turno. Si el reloj se agota durante una tir
   - Celular → servidor: `join {name, team, id?}` y `leave`. Cualquier otro mensaje se reenvía a Godot como `player_message {id, data}`.
   - Godot → servidor: `send {id, data}` (a un jugador) y `broadcast {data}` (a todos).
   - Servidor → Godot: `info {url}`, `roster`, `player_joined`, `player_left` y `player_message`.
+  - Servidor → celular: `joined`, `error {message}`, `left` y `counts {teams, max}` (cuántos hay en cada equipo).
+- La URL del host está fija en `SERVER_URL` de `hub_client.gd`. Si arrancas el servidor con otro `PORT`, cámbiala también ahí.
 - Reconexión: el celular guarda su `id` y lo reenvía con `join`. Si el `id` ya está en la lista, el servidor cambia el socket sin avisar a Godot.
 - Si cambias el protocolo, hay que tocar los tres lados: `server/server.js`, `server/public/index.html` y `Scripts/hub_client.gd`.
 
 ### Cabos sueltos conocidos
 - El lobby no está terminado: `Escenas/UI/lobby/lobby.tscn` no tiene script y `Scripts/lobby.tscn` es una copia con rutas rotas.
 - `Escenas/UI/UI.tscn` / `ui.gd` es una copia muerta del HUD (llama a `solicitar_tirar_dado`, que no existe). `GameManager.conectar_dado` no se usa.
-- `Escenas/main.tscn` instancia `gameManager.tscn`, así que hay un segundo `GameManager` además del autoload.
+- `Escenas/main.tscn` (la escena principal) es un `Node` vacío. `UI.tscn` y `gameManager.tscn` ya no se instancian en ninguna parte. No metas `GameManager` en una escena: es un autoload, y otra instancia duplicaría su estado y su `_ready()`.
 
 ## Cómo explicarme los cambios
 Estoy aprendiendo, así que explica lo que haces:

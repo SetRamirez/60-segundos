@@ -63,12 +63,12 @@ transform = Transform3D(8, 6.9938227e-07, 6.9938216e-07, -6.993822e-07, 3.496910
 text = "0
 "
 
-[node name="mensajeGanador" type="Label3D" parent="."]
-visible = false
+[node name="mensajeGanador" type="Label3D" parent="." unique_id=776785420]
 transform = Transform3D(8, 6.9938227e-07, 6.9938216e-07, -6.993822e-07, 3.4969105e-07, 8, 6.993822e-07, -8, 3.496911e-07, 0, 1, 0)
+visible = false
 no_depth_test = true
-outline_size = 24
 text = "¡Gana!"
+outline_size = 24
 
 [node name="posicionCamaras" type="Node3D" parent="." unique_id=1464834906]
 
@@ -76,12 +76,12 @@ text = "¡Gana!"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 0)
 
 [node name="vistaMesaDados" type="Marker3D" parent="posicionCamaras" unique_id=39367501]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 13, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 17, 0)
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=418820133]
 
 [node name="PanelAcciones" parent="HUD" unique_id=1093382476 instance=ExtResource("5_panel")]
 
-[node name="Temporizador" parent="." instance=ExtResource("6_tempo")]
+[node name="Temporizador" parent="." unique_id=1643426873 instance=ExtResource("6_tempo")]
 
 [connection signal="tiro_finalizado" from="Dado" to="." method="_on_dado_tiro_finalizado"]
