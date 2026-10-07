@@ -47,8 +47,7 @@ Solo se avanza dentro del minuto del turno. Si el reloj se agota durante una tir
 
 ### Cabos sueltos conocidos
 - El lobby no está terminado: `Escenas/UI/lobby/lobby.tscn` no tiene script y `Scripts/lobby.tscn` es una copia con rutas rotas.
-- `Escenas/UI/UI.tscn` / `ui.gd` es una copia muerta del HUD (llama a `solicitar_tirar_dado`, que no existe). `GameManager.conectar_dado` no se usa.
-- `Escenas/main.tscn` (la escena principal) es un `Node` vacío. `UI.tscn` y `gameManager.tscn` ya no se instancian en ninguna parte. No metas `GameManager` en una escena: es un autoload, y otra instancia duplicaría su estado y su `_ready()`.
+- `Escenas/main.tscn` (la escena principal) es un `Node` vacío. No metas `GameManager` en una escena: es un autoload, y otra instancia duplicaría su estado y su `_ready()`.
 
 ## Cómo explicarme los cambios
 Estoy aprendiendo, así que explica lo que haces:

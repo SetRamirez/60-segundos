@@ -24,9 +24,6 @@ func _ready():
 	GameManager.simular_dado.connect(_tirar)
 	pos_inicial = global_position
 
-func _simular_dado():
-	_tirar()
-
 func _tirar():
 	if lanzando:
 		return

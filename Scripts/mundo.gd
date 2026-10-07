@@ -96,8 +96,3 @@ func _on_turno_equipo_cambiado(_equipoId: int) -> void:
 	temporizador.reiniciar()
 	if not _tirada_en_curso:
 		_mostrar_turno()
-
-func mover_camara_suave(destino: Marker3D, duracion := 0.6) -> void:
-	var tween = create_tween()
-	tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tween.tween_property(camara3D, "global_transform", destino.global_transform, duracion)

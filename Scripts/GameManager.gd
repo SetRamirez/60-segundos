@@ -11,7 +11,6 @@ var equipos = {}
 var path_3D: Path3D=null
 var colaFichasPendientes: Array = []
 
-signal tablero_listo
 signal simular_dado
 signal ficha_movida(equipoId: int)  # al terminar la animación de moverFicha
 signal turno_equipo_cambiado(equipoId: int)
@@ -25,7 +24,6 @@ func EmpezarLobby():
 
 func registarPath(path_node: Path3D):
 	path_3D = path_node
-	tablero_listo.emit()
 	_procesarFichasPendientes()
 
 func _procesarFichasPendientes():
@@ -65,15 +63,9 @@ func recibirDatos(nombre1: String, nombre2: String):
 	instanciarFicha(nombre2,2)
 	iniciar_partida()
 	
-func conectar_dado(dado: Node) -> void:
-	dado.tiro_finalizado.connect(_on_dado_tiro_finalizado)
-
 func tirarDado():
 	simular_dado.emit()
 
-func _on_dado_tiro_finalizado(resultado: int) -> void:
-	moverFicha(resultado)
-	
 func moverFicha(casillas: int) -> Tween:
 	var equipo = equipos.get("equipo%s" % turnoEquipoId)
 	if equipo == null:
@@ -127,11 +119,6 @@ func actualizarOffsets(duracion := 0.0) -> void:
 			create_tween().tween_property(equipo.pathFicha, "h_offset", offset, duracion)
 		else:
 			equipo.pathFicha.h_offset = offset
-
-func comenzarTurno():
-	#hacer visible el panelAcciones
-	
-	pass
 
 func avanzarTurno():
 	#Cambiar turnos
