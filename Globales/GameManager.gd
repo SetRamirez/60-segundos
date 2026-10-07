@@ -64,4 +64,4 @@ func iniciar_partida():
 	turno_actual = 0
 	if turno_actual == 0:
 		turnoEquipoId = randi_range(1,2)
-	get_tree().change_scene_to_file("res://Escenas/Mundo.tscn")
+	get_tree().change_scene_to_file("res://Mundo/Mundo.tscn")

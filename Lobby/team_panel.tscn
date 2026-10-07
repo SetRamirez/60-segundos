@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b54acp78ncior"]
 
-[ext_resource type="Script" uid="uid://c1ja66egeiyhl" path="res://Scripts/team_panel.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://Escenas/UI/lobby/player_slot.tscn" id="2_slot"]
+[ext_resource type="Script" uid="uid://c1ja66egeiyhl" path="res://Lobby/team_panel.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://Lobby/player_slot.tscn" id="2_slot"]
 
 [sub_resource type="StyleBoxFlat" id="Style_panel"]
 bg_color = Color(0.486, 0.655, 0.647, 1)

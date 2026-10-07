@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bcag2ni0agmhu"]
 
-[ext_resource type="Script" uid="uid://d4k4ig1svmly0" path="res://Scripts/raycast_dado.gd" id="1_na2hn"]
+[ext_resource type="Script" uid="uid://d4k4ig1svmly0" path="res://Mundo/Dado/raycast_dado.gd" id="1_na2hn"]
 
 [node name="raycast_dado" type="RayCast3D" unique_id=1807044673]
 target_position = Vector3(0, -0.1, 0)

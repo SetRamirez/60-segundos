@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dgr3ynvglke2g"]
 
-[ext_resource type="Script" uid="uid://dp57u45nh35dd" path="res://Scripts/panel_acciones.gd" id="1_xdden"]
+[ext_resource type="Script" uid="uid://dp57u45nh35dd" path="res://Mundo/UI/panel_acciones.gd" id="1_xdden"]
 
 [node name="PanelAcciones" type="PanelContainer" unique_id=1356457845]
 visible = false

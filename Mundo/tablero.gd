@@ -5,7 +5,7 @@ extends Path3D
 
 const OFFSET_MISMA_CASILLA = 0.5  # separación lateral de las fichas que comparten casilla
 const DURACION_MOVIMIENTO = 0.8  # segundos que tarda una ficha en hacer todo su recorrido
-const ESCENA_FICHA := preload("res://Escenas/equipo.tscn")
+const ESCENA_FICHA := preload("res://Mundo/Ficha/equipo.tscn")
 
 var fichas: Dictionary = {}  # id del equipo -> Equipo (jugador.gd)
 

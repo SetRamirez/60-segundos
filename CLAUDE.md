@@ -7,24 +7,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Godot corre en el PC anfitrión, en la pantalla grande. Los jugadores se unen desde el celular por la LAN.
 - Servidor: `cd server && npm install && npm start` (escucha en `0.0.0.0:3000`; se cambia con `PORT=...`). No hay tests, linter ni build. `server/public/` se sirve tal cual.
-- F5 abre el lobby (`Escenas/UI/lobby/lobby.tscn`, la escena principal). Con el servidor encendido muestra la URL y los jugadores; sin servidor dice "Conectando con el servidor…", pero "Comenzar juego" funciona igual. Para probar solo el tablero, abre `Escenas/Mundo.tscn` y pulsa F6: sin lobby, `mundo.gd` crea dos equipos de prueba.
+- F5 abre el lobby (`Lobby/lobby.tscn`, la escena principal). Con el servidor encendido muestra la URL y los jugadores; sin servidor dice "Conectando con el servidor…", pero "Comenzar juego" funciona igual. Para probar solo el tablero, abre `Mundo/Mundo.tscn` y pulsa F6: sin lobby, `mundo.gd` crea dos equipos de prueba.
 
 ## Idioma
 - Responde siempre en español.
 - Mantén en español los nombres que ya existen en el código (`PanelAcciones`, `turnoEquipoId`, `moverFicha`, etc.) y sigue esa convención al crear nombres nuevos.
 
+## Carpetas
+Cada escena va junto a su script, agrupados por funcionalidad:
+- `Globales/`: los autoloads (`GameManager.gd`, `hub_client.gd`).
+- `Lobby/`: el lobby y los paneles de equipo.
+- `Mundo/`: el tablero 3D. Dentro están `Dado/` (dado, raycasts, mesa), `Ficha/` (`equipo.tscn` + `jugador.gd`) y `UI/` (`PanelAcciones` y `Temporizador`).
+- `Assets/`: modelos y texturas.
+
+Mueve o renombra archivos solo desde el panel FileSystem de Godot: así los `.uid` se mueven con los scripts y se actualizan las rutas de los `.tscn`. Las rutas `res://` escritas en los scripts no se actualizan solas (`change_scene_to_file` en `GameManager.gd` y `preload` en `tablero.gd`); búscalas con `grep -rn 'res://' --include=*.gd`.
+
 ## Arquitectura (respétala)
-- **Autoload `GameManager`** (`Scripts/GameManager.gd`): guarda el estado y las reglas de la partida, y cambia de escena. **Solo datos, nunca nodos**: un autoload vive todo el juego, pero los nodos de una escena se destruyen al cambiar de escena. `equipos` es `{id: {nombre, posicion}}` (clave `int`, 1 o 2; `posicion` es la casilla). Avisa a las escenas mediante señales: `simular_dado`, `ficha_movida`, `turno_equipo_cambiado`.
-- **Autoload `Hub`** (`Scripts/hub_client.gd`): el cliente WebSocket hacia el servidor. Se reconecta solo cada 2 s y sigue conectado al pasar del lobby a `Mundo`. Señales: `connection_changed`, `url_received`, `roster_received`, `player_joined`, `player_left`, `player_message`.
-- **Lobby** (`Escenas/UI/lobby/lobby.tscn` + `lobby.gd`, con dos `TeamPanel`): muestra los jugadores de `Hub`. "Comenzar juego" → `GameManager.recibirDatos(nombre1, nombre2)` (usa `TeamPanel.nombre_equipo()`) → `crearEquipos` + `iniciar_partida` → `Mundo.tscn`.
+- **Autoload `GameManager`** (`Globales/GameManager.gd`): guarda el estado y las reglas de la partida, y cambia de escena. **Solo datos, nunca nodos**: un autoload vive todo el juego, pero los nodos de una escena se destruyen al cambiar de escena. `equipos` es `{id: {nombre, posicion}}` (clave `int`, 1 o 2; `posicion` es la casilla). Avisa a las escenas mediante señales: `simular_dado`, `ficha_movida`, `turno_equipo_cambiado`.
+- **Autoload `Hub`** (`Globales/hub_client.gd`): el cliente WebSocket hacia el servidor. Se reconecta solo cada 2 s y sigue conectado al pasar del lobby a `Mundo`. Señales: `connection_changed`, `url_received`, `roster_received`, `player_joined`, `player_left`, `player_message`.
+- **Lobby** (`Lobby/lobby.tscn` + `lobby.gd`, con dos `TeamPanel`): muestra los jugadores de `Hub`. "Comenzar juego" → `GameManager.recibirDatos(nombre1, nombre2)` (usa `TeamPanel.nombre_equipo()`) → `crearEquipos` + `iniciar_partida` → `Mundo.tscn`.
 - **`Mundo.tscn` / `mundo.gd`** maneja lo visual en 3D: la cámara, el dado (`dado.gd`), el `Path3D` del tablero y la secuencia del tiro.
 - La UI son `CanvasLayer`s dentro de `Mundo.tscn`: `HUD/PanelAcciones` (el botón de tirar) y `Temporizador` (60 s).
-- Cada ficha es `Escenas/equipo.tscn`, con el script `Scripts/jugador.gd` (`class_name Equipo`, aunque el archivo se llame "jugador"). Guarda `id`, `nombre` y `pathFicha`; la casilla no está en la ficha, sino en `GameManager.equipos`.
-- **`Scripts/tablero.gd`** (en el nodo `Path3D` de `Mundo.tscn`) es el dueño de las fichas: `crearFichas()` (lo llama `mundo.gd` en su `_ready`, después de crear los equipos de prueba si hace falta), `animarFicha(movimiento)` y `actualizarOffsets()`.
+- Cada ficha es `Mundo/Ficha/equipo.tscn`, con el script `Mundo/Ficha/jugador.gd` (`class_name Equipo`, aunque el archivo se llame "jugador"). Guarda `id`, `nombre` y `pathFicha`; la casilla no está en la ficha, sino en `GameManager.equipos`.
+- **`Mundo/tablero.gd`** (en el nodo `Path3D` de `Mundo.tscn`) es el dueño de las fichas: `crearFichas()` (lo llama `mundo.gd` en su `_ready`, después de crear los equipos de prueba si hace falta), `animarFicha(movimiento)` y `actualizarOffsets()`.
 - Las fichas se mueven con `PathFollow3D`. La distancia por casilla es la longitud baked de la curva dividida entre `NUMERO_CASILLAS - 1`. `NUMERO_CASILLAS` (61, incluida la salida) está en `GameManager.gd`. Si cambias la textura del tablero, hay que redibujar la curva y actualizar `NUMERO_CASILLAS`.
 - Cuando dos fichas comparten casilla, `tablero.actualizarOffsets()` las separa con `h_offset`.
 - Usa `call_deferred` cuando haya errores de árbol ocupado en los cambios de escena.
-- Muchas conexiones de señales están en los `.tscn`, no en el código (busca `[connection` en `Escenas/`).
+- Muchas conexiones de señales están en los `.tscn`, no en el código (busca `[connection` en los `.tscn`).
 - Si un cambio rompe alguno de estos patrones, avísame antes de hacerlo y explica por qué.
 
 ### Flujo de un turno
@@ -44,10 +53,10 @@ Solo se avanza dentro del minuto del turno. Si el reloj se agota durante una tir
   - Servidor → celular: `joined`, `error {message}`, `left` y `counts {teams, max}` (cuántos hay en cada equipo).
 - La URL del host está fija en `SERVER_URL` de `hub_client.gd`. Si arrancas el servidor con otro `PORT`, cámbiala también ahí.
 - Reconexión: el celular guarda su `id` y lo reenvía con `join`. Si el `id` ya está en la lista, el servidor cambia el socket sin avisar a Godot.
-- Si cambias el protocolo, hay que tocar los tres lados: `server/server.js`, `server/public/index.html` y `Scripts/hub_client.gd`.
+- Si cambias el protocolo, hay que tocar los tres lados: `server/server.js`, `server/public/index.html` y `Globales/hub_client.gd`.
 
 ### Cabos sueltos conocidos
-- `Escenas/gameManager.tscn` existe, pero no se instancia en ninguna parte. No metas `GameManager` ni `Hub` en una escena: son autoloads, y otra instancia duplicaría su estado (y, en `Hub`, abriría una segunda conexión de host).
+- `Globales/gameManager.tscn` existe, pero no se instancia en ninguna parte. No metas `GameManager` ni `Hub` en una escena: son autoloads, y otra instancia duplicaría su estado (y, en `Hub`, abriría una segunda conexión de host).
 
 ## Cómo explicarme los cambios
 Estoy aprendiendo, así que explica lo que haces:

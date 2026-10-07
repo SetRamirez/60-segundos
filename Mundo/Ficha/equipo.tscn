@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d1w7i3vemtj5c"]
 
 [ext_resource type="PackedScene" uid="uid://crb412st36ibj" path="res://Assets/demo_assets/pin.glb" id="1_83bx5"]
-[ext_resource type="Script" uid="uid://cyal6o56b0sbf" path="res://Scripts/jugador.gd" id="1_pd7u1"]
+[ext_resource type="Script" uid="uid://cyal6o56b0sbf" path="res://Mundo/Ficha/jugador.gd" id="1_pd7u1"]
 
 [node name="Jugador" type="Node3D" unique_id=587802095]
 script = ExtResource("1_pd7u1")

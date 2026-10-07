@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://06qg0jb36wsu"]
 
-[ext_resource type="Script" uid="uid://pdb5bfo3p8fs" path="res://Scripts/temporizador.gd" id="1_oeoax"]
+[ext_resource type="Script" uid="uid://pdb5bfo3p8fs" path="res://Mundo/UI/temporizador.gd" id="1_oeoax"]
 [ext_resource type="Texture2D" uid="uid://dwa1svrxepgh5" path="res://Assets/demo_assets/reloj_demo.png" id="2_a8651"]
 
 [node name="Temporizador" type="CanvasLayer" unique_id=434422100]

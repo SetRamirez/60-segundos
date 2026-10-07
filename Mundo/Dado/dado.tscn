@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://b64a8nma5h374"]
 
-[ext_resource type="Script" uid="uid://bklc1ve01rdye" path="res://Scripts/dado.gd" id="1_753o7"]
+[ext_resource type="Script" uid="uid://bklc1ve01rdye" path="res://Mundo/Dado/dado.gd" id="1_753o7"]
 [ext_resource type="PackedScene" uid="uid://jrdf37dnytiq" path="res://Assets/dado.blend" id="1_ynjrm"]
-[ext_resource type="PackedScene" uid="uid://bcag2ni0agmhu" path="res://Escenas/raycast_dado.tscn" id="3_nx5p0"]
+[ext_resource type="PackedScene" uid="uid://bcag2ni0agmhu" path="res://Mundo/Dado/raycast_dado.tscn" id="3_nx5p0"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_sdhfp"]
 size = Vector3(2, 2, 2)
