@@ -27,13 +27,13 @@ Mueve o renombra archivos solo desde el panel FileSystem de Godot: así los `.ui
 - **Autoload `Hub`** (`Globales/hub_client.gd`): el cliente WebSocket hacia el servidor. Se reconecta solo cada 2 s y sigue conectado al pasar del lobby a `Mundo`. Señales: `connection_changed`, `url_received`, `roster_received`, `player_joined`, `player_left`, `player_message`.
 - **Lobby** (`Lobby/lobby.tscn` + `lobby.gd`, con dos `TeamPanel`): muestra los jugadores de `Hub`. "Comenzar juego" → `GameManager.recibirDatos(nombre1, nombre2)` (usa `TeamPanel.nombre_equipo()`) → `crearEquipos` + `iniciar_partida` → `Mundo.tscn`.
 - **`Mundo.tscn` / `mundo.gd`** maneja lo visual en 3D: la cámara, el dado (`dado.gd`), el `Path3D` del tablero y la secuencia del tiro.
-- La UI son `CanvasLayer`s dentro de `Mundo.tscn`: `HUD/PanelAcciones` (el botón de tirar) y `Temporizador` (60 s).
+- La UI son `CanvasLayer`s dentro de `Mundo.tscn`: `HUD/PanelAcciones` (el botón de tirar) y `Temporizador` (60 s). `PanelAcciones` (`panel_acciones.gd`) expone `mostrar_turno(nombreEquipo)` (pone "Turno de X", habilita el botón y se muestra) y `configurar_estado(puedeTirar)`; para ocultarlo, `mundo.gd` usa `hide()`/`show()`. `Temporizador` expone `iniciar()`, `reiniciar()` y la señal `tiempo_agotado`.
 - Cada ficha es `Mundo/Ficha/equipo.tscn`, con el script `Mundo/Ficha/jugador.gd` (`class_name Equipo`, aunque el archivo se llame "jugador"). Guarda `id`, `nombre` y `pathFicha`; la casilla no está en la ficha, sino en `GameManager.equipos`.
-- **`Mundo/tablero.gd`** (en el nodo `Path3D` de `Mundo.tscn`) es el dueño de las fichas: `crearFichas()` (lo llama `mundo.gd` en su `_ready`, después de crear los equipos de prueba si hace falta), `animarFicha(movimiento)` y `actualizarOffsets()`.
+- **`Mundo/tablero.gd`** (en el nodo `Path3D` de `Mundo.tscn`) es el dueño de las fichas: `crearFichas()`, `animarFicha(movimiento)` y `actualizarOffsets()`. `crearFichas()` se llama desde el `_ready` de `mundo.gd`, después de crear los equipos de prueba, y **no** desde el `_ready` del tablero: en Godot los hijos ejecutan `_ready` antes que el padre, así que con F6 el tablero aún no vería equipos. No lo muevas.
 - Las fichas se mueven con `PathFollow3D`. La distancia por casilla es la longitud baked de la curva dividida entre `NUMERO_CASILLAS - 1`. `NUMERO_CASILLAS` (61, incluida la salida) está en `GameManager.gd`. Si cambias la textura del tablero, hay que redibujar la curva y actualizar `NUMERO_CASILLAS`.
 - Cuando dos fichas comparten casilla, `tablero.actualizarOffsets()` las separa con `h_offset`.
 - Usa `call_deferred` cuando haya errores de árbol ocupado en los cambios de escena.
-- Muchas conexiones de señales están en los `.tscn`, no en el código (busca `[connection` en los `.tscn`).
+- Hay dos conexiones de señales hechas en los `.tscn` y no en el código: `Dado.tiro_finalizado` → `mundo.gd::_on_dado_tiro_finalizado` (en `Mundo.tscn`) y `botonTirarDado.pressed` → `_on_boton_tirar_dado_pressed` (en `UI/panelAcciones.tscn`). Las demás se hacen con `.connect()` en el `_ready` de `mundo.gd`. Si añades una nueva desde el editor, búscala con `[connection` en los `.tscn`.
 - Si un cambio rompe alguno de estos patrones, avísame antes de hacerlo y explica por qué.
 
 ### Flujo de un turno
