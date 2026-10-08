@@ -7,6 +7,7 @@ extends Node3D
 
 @onready var resultado_dado = $"resultado-dado"
 @onready var mensajeGanador = $mensajeGanador  # Label3D en el centro del tablero
+@onready var mensajeCategoria = $mensajeCategoria  # Label3D con la categoría de la casilla
 
 @onready var tablero = $Path3D  # tablero.gd: crea y anima las fichas
 @onready var dado = $Dado
@@ -35,6 +36,7 @@ func _ready():
 	GameManager.turno_equipo_cambiado.connect(_on_turno_equipo_cambiado)
 	temporizador.tiempo_agotado.connect(GameManager.avanzarTurno)
 	GameManager.partida_terminada.connect(_on_partida_terminada)
+	GameManager.categoria_obtenida.connect(_on_categoria_obtenida)
 	_mostrar_turno()
 
 # Aviso de inicio de turno: el panel centrado con el equipo que juega y el botón de tirar.
@@ -44,6 +46,7 @@ func _mostrar_turno() -> void:
 
 func _on_simular_dado() -> void:
 	panelAcciones.hide()  # no tapa la tirada y evita pulsar dos veces
+	mensajeCategoria.hide()  # la categoría anterior ya no vale
 	_tirada_en_curso = true
 	_turno_de_tirada = GameManager.turno_actual
 	if _vista_anterior != null:  # ya estamos en la mesa (el dado sigue rodando)
@@ -83,9 +86,15 @@ func _on_ficha_movida(equipoId: int) -> void:
 	temporizador.iniciar()
 	panelAcciones.show()
 
+# Por ahora solo se muestra; aquí se engancharán las preguntas de esa categoría.
+func _on_categoria_obtenida(_equipoId: int, categoria: String) -> void:
+	mensajeCategoria.text = "Categoría: %s" % categoria
+	mensajeCategoria.show()
+
 func _on_partida_terminada(equipoId: int) -> void:
 	temporizador.reiniciar()
 	panelAcciones.hide()
+	mensajeCategoria.hide()
 	mensajeGanador.text = "¡Gana %s!" % GameManager.equipos[equipoId].nombre
 	mensajeGanador.show()
 
@@ -99,5 +108,6 @@ func mover_camara_a(destino: Transform3D, duracion := 0.6) -> Tween:
 # Si hay una tirada a medias, el aviso espera a que termine para no mezclar dos tiradas.
 func _on_turno_equipo_cambiado(_equipoId: int) -> void:
 	temporizador.reiniciar()
+	mensajeCategoria.hide()
 	if not _tirada_en_curso:
 		_mostrar_turno()
