@@ -23,7 +23,7 @@ Cada escena va junto a su script, agrupados por funcionalidad:
 Mueve o renombra archivos solo desde el panel FileSystem de Godot: así los `.uid` se mueven con los scripts y se actualizan las rutas de los `.tscn`. Las rutas `res://` escritas en los scripts no se actualizan solas (`change_scene_to_file` en `GameManager.gd` y `preload` en `tablero.gd`); búscalas con `grep -rn 'res://' --include=*.gd`.
 
 ## Arquitectura (respétala)
-- **Autoload `GameManager`** (`Globales/GameManager.gd`): guarda el estado y las reglas de la partida, y cambia de escena. **Solo datos, nunca nodos**: un autoload vive todo el juego, pero los nodos de una escena se destruyen al cambiar de escena. `equipos` es `{id: {nombre, posicion}}` (clave `int`, 1 o 2; `posicion` es la casilla). Avisa a las escenas mediante señales: `simular_dado`, `ficha_movida`, `turno_equipo_cambiado`.
+- **Autoload `GameManager`** (`Globales/GameManager.gd`): guarda el estado y las reglas de la partida, y cambia de escena. **Solo datos, nunca nodos**: un autoload vive todo el juego, pero los nodos de una escena se destruyen al cambiar de escena. `equipos` es `{id: {nombre, posicion}}` (clave `int`, 1 o 2; `posicion` es la casilla). Avisa a las escenas mediante señales: `simular_dado`, `ficha_movida`, `turno_equipo_cambiado`, `partida_terminada`. `turnoEquipoId` es el equipo que juega (1 o 2); `turno_actual` es un contador que sube en cada `avanzarTurno()` y sirve para descartar tiradas de un turno que ya acabó.
 - **Autoload `Hub`** (`Globales/hub_client.gd`): el cliente WebSocket hacia el servidor. Se reconecta solo cada 2 s y sigue conectado al pasar del lobby a `Mundo`. Señales: `connection_changed`, `url_received`, `roster_received`, `player_joined`, `player_left`, `player_message`.
 - **Lobby** (`Lobby/lobby.tscn` + `lobby.gd`, con dos `TeamPanel`): muestra los jugadores de `Hub`. "Comenzar juego" → `GameManager.recibirDatos(nombre1, nombre2)` (usa `TeamPanel.nombre_equipo()`) → `crearEquipos` + `iniciar_partida` → `Mundo.tscn`.
 - **`Mundo.tscn` / `mundo.gd`** maneja lo visual en 3D: la cámara, el dado (`dado.gd`), el `Path3D` del tablero y la secuencia del tiro.
@@ -56,6 +56,7 @@ Solo se avanza dentro del minuto del turno. Si el reloj se agota durante una tir
 - Si cambias el protocolo, hay que tocar los tres lados: `server/server.js`, `server/public/index.html` y `Globales/hub_client.gd`.
 
 ### Cabos sueltos conocidos
+- Las preguntas y sus cuatro categorías aún no están implementadas: todavía no hay datos de preguntas ni mensajes del protocolo para responderlas. Hoy un turno es solo tirar el dado, mover la ficha y esperar al reloj.
 - `Globales/gameManager.tscn` existe, pero no se instancia en ninguna parte. No metas `GameManager` ni `Hub` en una escena: son autoloads, y otra instancia duplicaría su estado (y, en `Hub`, abriría una segunda conexión de host).
 
 ## Cómo explicarme los cambios
