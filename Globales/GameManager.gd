@@ -3,7 +3,7 @@ extends Node
 # Estado y reglas de la partida. Solo guarda datos: las fichas (nodos) las crea y anima
 # el tablero de Mundo (tablero.gd), porque los nodos se destruyen al cambiar de escena
 # y este autoload vive durante todo el juego.
-const NUMERO_CASILLAS = 61  # casillas Tile_000..Tile_060 de tablero_montana.glb, incluida la de salida
+const NUMERO_CASILLAS = 61  # casillas Tile_000..Tile_060 de tablero_juego.glb, incluida la de salida
 ## Categoría de cada color del tablero. En la montaña, la casilla 0 es la salida y desde la 1
 ## los colores repiten azul, rojo, amarillo, verde: la casilla N tiene la categoría
 ## CATEGORIAS[N % 4] (las verdes dan 0). Si cambia el modelo del tablero, hay que revisar este orden.
