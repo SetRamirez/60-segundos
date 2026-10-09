@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" uid="uid://dosn0y4vmrflc" path="res://Mundo/mundo.gd" id="1_nhmaw"]
 [ext_resource type="PackedScene" uid="uid://bhvruikoqb8jg" path="res://Mundo/Dado/mesa_dados.tscn" id="3_nhmaw"]
-[ext_resource type="Texture2D" uid="uid://b0gap2icpblvy" path="res://Assets/demo_assets/tablero-textura.png" id="3_wxw8o"]
 [ext_resource type="PackedScene" uid="uid://b64a8nma5h374" path="res://Mundo/Dado/dado.tscn" id="4_htlm0"]
 [ext_resource type="PackedScene" uid="uid://dgr3ynvglke2g" path="res://Mundo/UI/panelAcciones.tscn" id="5_panel"]
 [ext_resource type="PackedScene" uid="uid://06qg0jb36wsu" path="res://Mundo/UI/temporizador.tscn" id="6_tempo"]
 [ext_resource type="Script" uid="uid://dchujyabgagas" path="res://Mundo/tablero.gd" id="7_tablero"]
+[ext_resource type="PackedScene" uid="uid://j7q1vsnsm186" path="res://Assets/tablero_montana/tablero_montana.glb" id="8_ql8t6"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_g3dvk"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -20,17 +20,12 @@ background_mode = 2
 sky = SubResource("Sky_4hew7")
 glow_enabled = true
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_ql73s"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v0s4m"]
-albedo_texture = ExtResource("3_wxw8o")
-
 [sub_resource type="Curve3D" id="Curve3D_tablero"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 13, 0, 8, 0, 0, 0, 0, 0, 0, 13, 0, -8, 0, 0, 0, 0, 0, 0, -13, 0, -8, 0, 0, 0, 0, 0, 0, -13, 0, 8, 0, 0, 0, 0, 0, 0, 9, 0, 8, 0, 0, 0, 0, 0, 0, 9, 0, -4, 0, 0, 0, 0, 0, 0, -9, 0, -4, 0, 0, 0, 0, 0, 0, -9, 0, 4, 0, 0, 0, 0, 0, 0, -7, 0, 4),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 9.866, 0.733, -1.19, 0, 0, 0, 0, 0, 0, 9.487, 0.789, -2.673, 0, 0, 0, 0, 0, 0, 8.884, 0.845, -4.079, 0, 0, 0, 0, 0, 0, 8.067, 0.901, -5.374, 0, 0, 0, 0, 0, 0, 7.057, 0.958, -6.523, 0, 0, 0, 0, 0, 0, 5.877, 1.016, -7.498, 0, 0, 0, 0, 0, 0, 4.556, 1.074, -8.271, 0, 0, 0, 0, 0, 0, 3.128, 1.132, -8.82, 0, 0, 0, 0, 0, 0, 1.629, 1.191, -9.128, 0, 0, 0, 0, 0, 0, 0.1, 1.251, -9.185, 0, 0, 0, 0, 0, 0, -1.418, 1.311, -8.987, 0, 0, 0, 0, 0, 0, -2.88, 1.372, -8.537, 0, 0, 0, 0, 0, 0, -4.245, 1.433, -7.846, 0, 0, 0, 0, 0, 0, -5.472, 1.495, -6.931, 0, 0, 0, 0, 0, 0, -6.522, 1.558, -5.818, 0, 0, 0, 0, 0, 0, -7.361, 1.621, -4.539, 0, 0, 0, 0, 0, 0, -7.962, 1.685, -3.132, 0, 0, 0, 0, 0, 0, -8.301, 1.75, -1.64, 0, 0, 0, 0, 0, 0, -8.366, 1.815, -0.111, 0, 0, 0, 0, 0, 0, -8.151, 1.881, 1.403, 0, 0, 0, 0, 0, 0, -7.66, 1.948, 2.852, 0, 0, 0, 0, 0, 0, -6.907, 2.016, 4.184, 0, 0, 0, 0, 0, 0, -5.916, 2.084, 5.349, 0, 0, 0, 0, 0, 0, -4.721, 2.154, 6.304, 0, 0, 0, 0, 0, 0, -3.363, 2.224, 7.008, 0, 0, 0, 0, 0, 0, -1.894, 2.295, 7.433, 0, 0, 0, 0, 0, 0, -0.369, 2.367, 7.556, 0, 0, 0, 0, 0, 0, 1.149, 2.441, 7.37, 0, 0, 0, 0, 0, 0, 2.596, 2.515, 6.878, 0, 0, 0, 0, 0, 0, 3.911, 2.59, 6.096, 0, 0, 0, 0, 0, 0, 5.03, 2.667, 5.055, 0, 0, 0, 0, 0, 0, 5.902, 2.744, 3.798, 0, 0, 0, 0, 0, 0, 6.48, 2.823, 2.383, 0, 0, 0, 0, 0, 0, 6.731, 2.904, 0.875, 0, 0, 0, 0, 0, 0, 6.637, 2.985, -0.651, 0, 0, 0, 0, 0, 0, 6.197, 3.068, -2.115, 0, 0, 0, 0, 0, 0, 5.429, 3.153, -3.437, 0, 0, 0, 0, 0, 0, 4.37, 3.239, -4.538, 0, 0, 0, 0, 0, 0, 3.076, 3.327, -5.351, 0, 0, 0, 0, 0, 0, 1.621, 3.417, -5.82, 0, 0, 0, 0, 0, 0, 0.096, 3.509, -5.908, 0, 0, 0, 0, 0, 0, -1.4, 3.603, -5.6, 0, 0, 0, 0, 0, 0, -2.762, 3.699, -4.909, 0, 0, 0, 0, 0, 0, -3.887, 3.798, -3.876, 0, 0, 0, 0, 0, 0, -4.682, 3.899, -2.572, 0, 0, 0, 0, 0, 0, -5.074, 4.003, -1.097, 0, 0, 0, 0, 0, 0, -5.017, 4.111, 0.429, 0, 0, 0, 0, 0, 0, -4.504, 4.221, 1.866, 0, 0, 0, 0, 0, 0, -3.569, 4.336, 3.072, 0, 0, 0, 0, 0, 0, -2.297, 4.454, 3.913, 0, 0, 0, 0, 0, 0, -0.818, 4.577, 4.281, 0, 0, 0, 0, 0, 0, 0.696, 4.705, 4.114, 0, 0, 0, 0, 0, 0, 2.047, 4.839, 3.411, 0, 0, 0, 0, 0, 0, 3.03, 4.98, 2.249, 0, 0, 0, 0, 0, 0, 3.468, 5.129, 0.792, 0, 0, 0, 0, 0, 0, 3.251, 5.287, -0.711, 0, 0, 0, 0, 0, 0, 2.382, 5.457, -1.955, 0, 0, 0, 0, 0, 0, 1.022, 5.641, -2.622, 0, 0, 0, 0, 0, 0, -0.481, 5.844, -2.473, 0, 0, 0, 0, 0, 0, -1.611, 6.073, -1.481, 0, 0, 0, 0, 0, 0, -1.8, 6.34, 0),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
-point_count = 9
+point_count = 61
 
 [node name="Mundo" type="Node3D" unique_id=1530070908]
 script = ExtResource("1_nhmaw")
@@ -44,11 +39,6 @@ shadow_enabled = true
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1780239744]
 transform = Transform3D(1, -8.351872e-23, -4.371139e-08, 4.371139e-08, 1.9106855e-15, 1, 0, -1, 1.9106855e-15, 0, 16, 0)
-
-[node name="tablero" type="MeshInstance3D" parent="." unique_id=2021961108]
-transform = Transform3D(16, 0, 0, 0, 1, 0, 0, 0, 11, 0, 0, 0)
-mesh = SubResource("PlaneMesh_ql73s")
-surface_material_override/0 = SubResource("StandardMaterial3D_v0s4m")
 
 [node name="Path3D" type="Path3D" parent="." unique_id=1647209381]
 curve = SubResource("Curve3D_tablero")
@@ -73,7 +63,7 @@ text = "¡Gana!"
 outline_size = 24
 
 [node name="mensajeCategoria" type="Label3D" parent="." unique_id=1938475620]
-transform = Transform3D(5, 4.371139e-07, 4.371139e-07, -4.371139e-07, 2.1855694e-07, 5, 4.371139e-07, -5, 2.1855694e-07, 0, 1, 4)
+transform = Transform3D(5, 4.371139e-07, 4.371139e-07, -4.371139e-07, 2.1855693e-07, 5, 4.371139e-07, -5, 2.1855693e-07, 0, 1, 4)
 visible = false
 no_depth_test = true
 text = "Categoría"
@@ -92,5 +82,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 17, 0)
 [node name="PanelAcciones" parent="HUD" unique_id=1093382476 instance=ExtResource("5_panel")]
 
 [node name="Temporizador" parent="." unique_id=1643426873 instance=ExtResource("6_tempo")]
+
+[node name="tablero_montana" parent="." unique_id=719549454 instance=ExtResource("8_ql8t6")]
 
 [connection signal="tiro_finalizado" from="Dado" to="." method="_on_dado_tiro_finalizado"]
