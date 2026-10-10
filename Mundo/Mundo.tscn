@@ -84,5 +84,3 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 17, 0)
 [node name="Temporizador" parent="." unique_id=1643426873 instance=ExtResource("6_tempo")]
 
 [node name="tablero_montana" parent="." unique_id=719549454 instance=ExtResource("8_ql8t6")]
-
-[connection signal="tiro_finalizado" from="Dado" to="." method="_on_dado_tiro_finalizado"]

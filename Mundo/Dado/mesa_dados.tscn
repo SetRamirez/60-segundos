@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://bhvruikoqb8jg"]
 
 [ext_resource type="Texture2D" uid="uid://4qwxn8l77y8j" path="res://Assets/demo_assets/red-table-texture.jpg" id="1_2dekb"]
-[ext_resource type="Script" uid="uid://llcffpk8lpcw" path="res://Mundo/Dado/mesa_dados.gd" id="1_w0rpg"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_ql73s"]
 
@@ -35,7 +34,6 @@ bounce = 1.0
 bounce = 1.0
 
 [node name="mesa_dados" type="Node3D" unique_id=1692459830]
-script = ExtResource("1_w0rpg")
 
 [node name="mesa" type="StaticBody3D" parent="." unique_id=1655570478]
 

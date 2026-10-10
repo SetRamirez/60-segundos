@@ -2,6 +2,9 @@
 .godot/
 /android/
 
+# Copias de seguridad que Blender crea al guardar
+*.blend1
+
 # Claude Code (configuración personal)
 .claude/settings.local.json
 **/.claude/settings.local.json
