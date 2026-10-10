@@ -10,9 +10,10 @@ extends RigidBody3D
 @export var tiempo_maximo := 8.0
 ## Qué tan hacia abajo debe apuntar la cara apoyada (1 = perfectamente plana) para aceptar el resultado.
 @export var alineacion_minima := 0.9
+## Impulso con el que se lanza el dado (la mitad se usa como giro).
+@export var fuerza_tiro := 30.0
 
-var pos_inicial
-var fuerza_tiro = 30
+var pos_inicial: Vector3  # local, igual que transform.origin, que es donde se restaura
 var lanzando := false  # evita emitir un resultado cuando el dado se queda quieto sin haber sido tirado
 var _segundos_quieto := 0.0
 var _segundos_lanzado := 0.0
@@ -21,7 +22,7 @@ signal tiro_finalizado(valor: int)
 
 
 func _ready():
-	pos_inicial = global_position
+	pos_inicial = position
 
 ## Tira el dado y espera a que se detenga: devuelve el valor de la cara de arriba.
 ## Se usa con await: var valor: int = await dado.lanzar()

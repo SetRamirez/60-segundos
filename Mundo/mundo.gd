@@ -2,7 +2,6 @@ extends Node3D
 
 @onready var camara3D = $Camera3D
 
-@onready var vistaTablero = $posicionCamaras/vistaTableroGral
 @onready var vistaMesaDados = $posicionCamaras/vistaMesaDados
 
 @onready var resultado_dado = $"resultado-dado"
