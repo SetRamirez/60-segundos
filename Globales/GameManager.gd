@@ -13,11 +13,7 @@ var turnoEquipoId: int;
 ## id del equipo (1 o 2) -> {"nombre": String, "posicion": int (casilla, 0 = salida)}
 var equipos: Dictionary = {}
 
-signal simular_dado
-signal ficha_movida(equipoId: int)  # al terminar la animación del movimiento (terminarMovimiento)
 signal turno_equipo_cambiado(equipoId: int)
-signal partida_terminada(equipoId: int)  # un equipo cayó exacto en la última casilla
-signal categoria_obtenida(equipoId: int, categoria: String)  # la ficha del equipo en turno cayó en una casilla
 
 # Crea los equipos en la salida. El id de cada equipo es su orden en la lista (1, 2...).
 func crearEquipos(nombres: Array) -> void:
@@ -28,9 +24,6 @@ func crearEquipos(nombres: Array) -> void:
 func recibirDatos(nombre1: String, nombre2: String):
 	crearEquipos([nombre1, nombre2])
 	iniciar_partida()
-
-func tirarDado():
-	simular_dado.emit()
 
 # Mueve en los datos la ficha del equipo en turno y devuelve el recorrido para animarlo:
 # {id, inicio, tope, final}. Si no rebota, tope == final.
@@ -49,15 +42,9 @@ func moverFicha(casillas: int) -> Dictionary:
 	equipo.posicion = maxi(destino - 2 * exceso, 0)
 	return {"id": turnoEquipoId, "inicio": inicio, "tope": mini(destino, ultima), "final": equipo.posicion}
 
-# Se llama cuando la animación del movimiento termina.
-func terminarMovimiento(equipoId: int) -> void:
-	if equipos[equipoId].posicion == NUMERO_CASILLAS - 1:
-		partida_terminada.emit(equipoId)  # el reloj no arranca: no se emite ficha_movida
-	else:
-		# Si el tiempo se acabó con la ficha en marcha, el turno ya es de otro equipo: no hay categoría.
-		if equipoId == turnoEquipoId:
-			categoria_obtenida.emit(equipoId, categoriaDeCasilla(equipos[equipoId].posicion))
-		ficha_movida.emit(equipoId)
+# Se gana al caer exacto en la última casilla (moverFicha ya calcula el rebote).
+func haGanado(equipoId: int) -> bool:
+	return equipos[equipoId].posicion == NUMERO_CASILLAS - 1
 
 func categoriaDeCasilla(casilla: int) -> String:
 	return CATEGORIAS[casilla % CATEGORIAS.size()]

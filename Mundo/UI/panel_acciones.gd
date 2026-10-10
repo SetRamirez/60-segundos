@@ -1,5 +1,6 @@
 extends PanelContainer
 
+signal tirar_pulsado  # mundo.gd la escucha y hace la tirada completa
 
 @onready var botonTirarDado = $MarginContainer/VBoxContainer/botonTirarDado
 @onready var labelEquipo = $MarginContainer/VBoxContainer/labelEquipoDeTurno
@@ -19,4 +20,4 @@ func mostrar_turno(nombreEquipo: String) -> void:
 
 
 func _on_boton_tirar_dado_pressed() -> void:
-	GameManager.tirarDado()
+	tirar_pulsado.emit()

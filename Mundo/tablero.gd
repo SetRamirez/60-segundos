@@ -7,7 +7,7 @@ const OFFSET_MISMA_CASILLA = 0.5  # separación lateral de las fichas que compar
 const DURACION_MOVIMIENTO = 0.8  # segundos que tarda una ficha en hacer todo su recorrido
 const ESCENA_FICHA := preload("res://Mundo/Ficha/equipo.tscn")
 
-var fichas: Dictionary = {}  # id del equipo -> Equipo (jugador.gd)
+var fichas: Dictionary = {}  # id del equipo -> PathFollow3D que lleva su ficha (equipo.tscn)
 
 
 func crearFichas() -> void:
@@ -18,20 +18,19 @@ func crearFichas() -> void:
 		pathFollow.rotation_mode = PathFollow3D.ROTATION_NONE
 		add_child(pathFollow)
 
-		var ficha: Equipo = ESCENA_FICHA.instantiate()
+		var ficha: Node3D = ESCENA_FICHA.instantiate()
 		ficha.name = "equipo%s" % id
 		pathFollow.add_child(ficha)
-		ficha.configurar(GameManager.equipos[id].nombre, id, pathFollow)
 
 		pathFollow.progress = GameManager.equipos[id].posicion * _distanciaPorCasilla()
-		fichas[id] = ficha
+		fichas[id] = pathFollow
 	actualizarOffsets()
 
 
 # Anima el recorrido que devuelve GameManager.moverFicha: avanza hasta "tope" y,
 # si se pasó de la última casilla, retrocede hasta "final".
 func animarFicha(movimiento: Dictionary) -> Tween:
-	var pathFicha: PathFollow3D = fichas[movimiento.id].pathFicha
+	var pathFicha: PathFollow3D = fichas[movimiento.id]
 	var distancia := _distanciaPorCasilla()
 	var avance: int = movimiento.tope - movimiento.inicio
 	var retroceso: int = movimiento.tope - movimiento.final
@@ -60,7 +59,7 @@ func actualizarOffsets(duracion := 0.0) -> void:
 		var offset := 0.0
 		if compartida:
 			offset = OFFSET_MISMA_CASILLA if id == 1 else -OFFSET_MISMA_CASILLA
-		var pathFicha: PathFollow3D = fichas[id].pathFicha
+		var pathFicha: PathFollow3D = fichas[id]
 		if duracion > 0.0:
 			create_tween().tween_property(pathFicha, "h_offset", offset, duracion)
 		else:

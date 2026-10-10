@@ -17,17 +17,17 @@ var lanzando := false  # evita emitir un resultado cuando el dado se queda quiet
 var _segundos_quieto := 0.0
 var _segundos_lanzado := 0.0
 
-signal tiro_finalizado(valor)
+signal tiro_finalizado(valor: int)
 
 
 func _ready():
-	GameManager.simular_dado.connect(_tirar)
 	pos_inicial = global_position
 
-func _tirar():
-	if lanzando:
-		return
+## Tira el dado y espera a que se detenga: devuelve el valor de la cara de arriba.
+## Se usa con await: var valor: int = await dado.lanzar()
+func lanzar() -> int:
 	_lanzar()
+	return await tiro_finalizado
 
 # También se usa para repetir la tirada cuando el dado queda inclinado o no se detiene.
 func _lanzar():
