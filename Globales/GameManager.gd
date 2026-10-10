@@ -15,19 +15,24 @@ var equipos: Dictionary = {}
 
 signal turno_equipo_cambiado(equipoId: int)
 
-# Crea los equipos en la salida. El id de cada equipo es su orden en la lista (1, 2...).
-func crearEquipos(nombres: Array) -> void:
+# Deja lista una partida nueva: los equipos en la salida, el primer turno sorteado y el
+# contador de turnos a cero. No cambia de escena, para que Mundo.tscn con F6 la use también.
+# El id de cada equipo es su orden en la lista (1, 2...).
+func prepararPartida(nombres: Array) -> void:
 	equipos.clear()
 	for i in nombres.size():
 		equipos[i + 1] = {"nombre": nombres[i], "posicion": 0}
+	turno_actual = 0
+	turnoEquipoId = randi_range(1, 2)
 
+# Desde el lobby: prepara la partida y pasa al tablero.
 func recibirDatos(nombre1: String, nombre2: String):
-	crearEquipos([nombre1, nombre2])
-	iniciar_partida()
+	prepararPartida([nombre1, nombre2])
+	get_tree().change_scene_to_file("res://Mundo/Mundo.tscn")
 
 # Mueve en los datos la ficha del equipo en turno y devuelve el recorrido para animarlo.
 func moverFicha(casillas: int) -> Movimiento:
-	var equipo: Dictionary = equipos[turnoEquipoId]  # siempre existe: lo crea crearEquipos
+	var equipo: Dictionary = equipos[turnoEquipoId]  # siempre existe: lo crea prepararPartida
 
 	# Para ganar hay que caer exacto en la última casilla: si sobran puntos,
 	# la ficha llega al final y retrocede las casillas que se pasó.
@@ -53,9 +58,3 @@ func avanzarTurno():
 		turnoEquipoId =1
 	turno_actual += 1
 	turno_equipo_cambiado.emit(turnoEquipoId)
-
-func iniciar_partida():
-	turno_actual = 0
-	if turno_actual == 0:
-		turnoEquipoId = randi_range(1,2)
-	get_tree().change_scene_to_file("res://Mundo/Mundo.tscn")

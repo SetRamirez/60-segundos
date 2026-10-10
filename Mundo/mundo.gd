@@ -22,10 +22,9 @@ var _tirada_en_curso := false  # desde que se pulsa tirar hasta que la ficha ter
 
 
 func _ready():
-	# Al ejecutar Mundo.tscn directamente (F6) no se pasa por el lobby: crea equipos de prueba.
+	# Al ejecutar Mundo.tscn directamente (F6) no se pasa por el lobby: partida con equipos de prueba.
 	if GameManager.equipos.is_empty():
-		GameManager.crearEquipos(["Equipo 1", "Equipo 2"])
-		GameManager.turnoEquipoId = randi_range(1, 2)
+		GameManager.prepararPartida(["Equipo 1", "Equipo 2"])
 	# Se llama desde aquí y no desde el _ready del tablero: los hijos ejecutan _ready antes
 	# que el padre, y el tablero aún no vería los equipos de prueba.
 	tablero.crearFichas()
