@@ -25,13 +25,9 @@ func recibirDatos(nombre1: String, nombre2: String):
 	crearEquipos([nombre1, nombre2])
 	iniciar_partida()
 
-# Mueve en los datos la ficha del equipo en turno y devuelve el recorrido para animarlo:
-# {id, inicio, tope, final}. Si no rebota, tope == final.
-func moverFicha(casillas: int) -> Dictionary:
-	var equipo: Dictionary = equipos.get(turnoEquipoId, {})
-	if equipo.is_empty():
-		push_error("No hay ficha para el equipo %s" % turnoEquipoId)
-		return {}
+# Mueve en los datos la ficha del equipo en turno y devuelve el recorrido para animarlo.
+func moverFicha(casillas: int) -> Movimiento:
+	var equipo: Dictionary = equipos[turnoEquipoId]  # siempre existe: lo crea crearEquipos
 
 	# Para ganar hay que caer exacto en la última casilla: si sobran puntos,
 	# la ficha llega al final y retrocede las casillas que se pasó.
@@ -40,7 +36,7 @@ func moverFicha(casillas: int) -> Dictionary:
 	var destino: int = inicio + casillas
 	var exceso := maxi(destino - ultima, 0)
 	equipo.posicion = maxi(destino - 2 * exceso, 0)
-	return {"id": turnoEquipoId, "inicio": inicio, "tope": mini(destino, ultima), "final": equipo.posicion}
+	return Movimiento.new(turnoEquipoId, inicio, mini(destino, ultima), equipo.posicion)
 
 # Se gana al caer exacto en la última casilla (moverFicha ya calcula el rebote).
 func haGanado(equipoId: int) -> bool:

@@ -15,7 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Carpetas
 Cada escena va junto a su script, agrupados por funcionalidad:
-- `Globales/`: los autoloads (`GameManager.gd`, `hub_client.gd`).
+- `Globales/`: los autoloads (`GameManager.gd`, `hub_client.gd`) y las clases de datos que usan (`movimiento.gd`, `class_name Movimiento`). Si creas un script con `class_name` fuera del editor, Godot no lo reconoce hasta que el editor escanea el proyecto.
 - `Lobby/`: el lobby y los paneles de equipo.
 - `Mundo/`: el tablero 3D. Dentro están `Dado/` (dado, raycasts, mesa), `Ficha/` (`equipo.tscn`) y `UI/` (`PanelAcciones` y `Temporizador`).
 - `Assets/`: modelos y texturas.
@@ -39,7 +39,7 @@ Mueve o renombra archivos solo desde el panel FileSystem de Godot: así los `.ui
 - Si un cambio rompe alguno de estos patrones, avísame antes de hacerlo y explica por qué.
 
 ### Flujo de un turno
-Aviso de turno (`PanelAcciones` centrado con "Turno de X") → botón → `tirar_pulsado` → `mundo.gd::_tirar()`, que hace en orden: ocultar el panel → la cámara va a la mesa y `await dado.lanzar()` → la cámara vuelve → `GameManager.moverFicha()` (actualiza la casilla y devuelve `{id, inicio, tope, final}`) → `await tablero.animarFicha()` → `GameManager.haGanado()` → "Categoría: X" en el `Label3D` `mensajeCategoria` (que se oculta al tirar, al cambiar de turno y al ganar) → `Temporizador.iniciar()` (solo si estaba parado) y el panel vuelve para poder tirar otra vez → `tiempo_agotado` → `GameManager.avanzarTurno()` → `turno_equipo_cambiado` → `Temporizador.reiniciar()` y aviso del nuevo equipo.
+Aviso de turno (`PanelAcciones` centrado con "Turno de X") → botón → `tirar_pulsado` → `mundo.gd::_tirar()`, que hace en orden: ocultar el panel → la cámara va a la mesa y `await dado.lanzar()` → la cámara vuelve → `GameManager.moverFicha()` (actualiza la casilla y devuelve un `Movimiento`: `equipoId`, `inicio`, `tope`, `final`; clase de datos en `Globales/movimiento.gd`) → `await tablero.animarFicha()` → `GameManager.haGanado()` → "Categoría: X" en el `Label3D` `mensajeCategoria` (que se oculta al tirar, al cambiar de turno y al ganar) → `Temporizador.iniciar()` (solo si estaba parado) y el panel vuelve para poder tirar otra vez → `tiempo_agotado` → `GameManager.avanzarTurno()` → `turno_equipo_cambiado` → `Temporizador.reiniciar()` y aviso del nuevo equipo.
 
 Para ganar hay que caer **exacto** en la última casilla. Si el dado da de más, `moverFicha` calcula el rebote (`tope` = última casilla, `final` = la casilla tras retroceder lo que se pasó) y `animarFicha` hace los dos tramos. Al caer exacto, `haGanado()` da `true` y `mundo.gd` (`_mostrar_ganador`) para el reloj, oculta el panel y muestra al ganador en `mensajeGanador`, un `Label3D` en el centro del tablero.
 

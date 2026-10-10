@@ -62,12 +62,9 @@ func _tirar() -> void:
 	# Si el tiempo se acaba con la ficha ya en marcha, termina de moverse (y puede ganar).
 	if GameManager.turno_actual == turno:
 		var movimiento := GameManager.moverFicha(valor)
-		if movimiento.is_empty():
-			_tirada_en_curso = false
-			return
 		await tablero.animarFicha(movimiento).finished
-		if GameManager.haGanado(movimiento.id):
-			_mostrar_ganador(movimiento.id)
+		if GameManager.haGanado(movimiento.equipoId):
+			_mostrar_ganador(movimiento.equipoId)
 			return
 
 	_tirada_en_curso = false

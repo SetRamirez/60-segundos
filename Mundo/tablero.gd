@@ -29,11 +29,11 @@ func crearFichas() -> void:
 
 # Anima el recorrido que devuelve GameManager.moverFicha: avanza hasta "tope" y,
 # si se pasó de la última casilla, retrocede hasta "final".
-func animarFicha(movimiento: Dictionary) -> Tween:
-	var pathFicha: PathFollow3D = fichas[movimiento.id]
+func animarFicha(movimiento: Movimiento) -> Tween:
+	var pathFicha: PathFollow3D = fichas[movimiento.equipoId]
 	var distancia := _distanciaPorCasilla()
-	var avance: int = movimiento.tope - movimiento.inicio
-	var retroceso: int = movimiento.tope - movimiento.final
+	var avance := movimiento.tope - movimiento.inicio
+	var retroceso := movimiento.tope - movimiento.final
 
 	# Los tramos se ejecutan en orden; el tiempo se reparte según las casillas de cada uno.
 	var segundosPorCasilla := DURACION_MOVIMIENTO / maxi(avance + retroceso, 1)
