@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dgr3ynvglke2g"]
 
-[ext_resource type="Script" uid="uid://dp57u45nh35dd" path="res://Mundo/UI/panel_acciones.gd" id="1_xdden"]
+[ext_resource type="Script" uid="uid://dp57u45nh35dd" path="res://Mundo/UI/PanelAcciones.cs" id="1_xdden"]
 
 [node name="PanelAcciones" type="PanelContainer" unique_id=1356457845]
 visible = false
@@ -39,4 +39,4 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 50
 text = "Tirar Dado"
 
-[connection signal="pressed" from="MarginContainer/VBoxContainer/botonTirarDado" to="." method="_on_boton_tirar_dado_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/botonTirarDado" to="." method="OnBotonTirarDadoPressed"]

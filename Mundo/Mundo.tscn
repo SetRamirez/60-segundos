@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://ca5dbi4bl84me"]
 
-[ext_resource type="Script" uid="uid://dosn0y4vmrflc" path="res://Mundo/mundo.gd" id="1_nhmaw"]
+[ext_resource type="Script" uid="uid://dosn0y4vmrflc" path="res://Mundo/Mundo.cs" id="1_nhmaw"]
 [ext_resource type="PackedScene" uid="uid://bhvruikoqb8jg" path="res://Mundo/Dado/mesa_dados.tscn" id="3_nhmaw"]
 [ext_resource type="PackedScene" uid="uid://b64a8nma5h374" path="res://Mundo/Dado/dado.tscn" id="4_htlm0"]
 [ext_resource type="PackedScene" uid="uid://dgr3ynvglke2g" path="res://Mundo/UI/panelAcciones.tscn" id="5_panel"]
 [ext_resource type="PackedScene" uid="uid://06qg0jb36wsu" path="res://Mundo/UI/temporizador.tscn" id="6_tempo"]
-[ext_resource type="Script" uid="uid://dchujyabgagas" path="res://Mundo/tablero.gd" id="7_tablero"]
+[ext_resource type="Script" uid="uid://dchujyabgagas" path="res://Mundo/Tablero.cs" id="7_tablero"]
 [ext_resource type="PackedScene" uid="uid://basbb4lgytstp" path="res://Assets/tablero_montana/tablero_juego.glb" id="8_ql8t6"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_g3dvk"]
