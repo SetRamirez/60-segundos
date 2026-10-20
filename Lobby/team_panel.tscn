@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b54acp78ncior"]
 
-[ext_resource type="Script" uid="uid://c1ja66egeiyhl" path="res://Lobby/team_panel.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://c1ja66egeiyhl" path="res://Lobby/TeamPanel.cs" id="1_script"]
 [ext_resource type="PackedScene" path="res://Lobby/player_slot.tscn" id="2_slot"]
 
 [sub_resource type="StyleBoxFlat" id="Style_panel"]
@@ -42,7 +42,7 @@ corner_radius_bottom_left = 14
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("Style_panel")
 script = ExtResource("1_script")
-slot_scene = ExtResource("2_slot")
+SlotScene = ExtResource("2_slot")
 
 [node name="Margin" type="MarginContainer" parent="." unique_id=253489264]
 layout_mode = 2
