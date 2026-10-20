@@ -5,6 +5,15 @@ public partial class Mundo : Node3D
     /// <summary>Segundos que la cámara se queda en la mesa mostrando el resultado antes de volver.</summary>
     [Export] public float PausaResultado { get; set; } = 1.0f;
 
+    /// <summary>
+    /// Posición de la cámara respecto a la ficha mientras la sigue. Queda por encima y hacia el
+    /// borde inferior de la pantalla (+Z), así mira hacia abajo en ángulo picado.
+    /// </summary>
+    [Export] public Vector3 OffsetSeguimiento { get; set; } = new(0, 7, 5);
+
+    /// <summary>Rapidez con que la cámara alcanza a la ficha: más alto, más pegada a ella.</summary>
+    [Export] public float SuavizadoSeguimiento { get; set; } = 8.0f;
+
     private Camera3D _camara3D;
     private Marker3D _vistaMesaDados;
     private Label3D _resultadoDado;
@@ -16,6 +25,7 @@ public partial class Mundo : Node3D
     private PanelAcciones _panelAcciones;
 
     private bool _tiradaEnCurso = false; // desde que se pulsa tirar hasta que la ficha termina de moverse
+    private Node3D _fichaSeguida; // la ficha que sigue la cámara; null = no sigue a ninguna
 
     public override void _Ready()
     {
@@ -48,6 +58,18 @@ public partial class Mundo : Node3D
         GameManager.Instancia.TurnoEquipoCambiado -= OnTurnoEquipoCambiado;
     }
 
+    // Cada fotograma, mientras haya una ficha seguida, la cámara se acerca a su posición de
+    // seguimiento y la mira. El peso depende de delta para que vaya igual a cualquier FPS.
+    public override void _Process(double delta)
+    {
+        if (_fichaSeguida == null)
+            return;
+        Vector3 objetivo = _fichaSeguida.GlobalPosition + OffsetSeguimiento;
+        float peso = 1.0f - Mathf.Exp(-SuavizadoSeguimiento * (float)delta);
+        _camara3D.GlobalPosition = _camara3D.GlobalPosition.Lerp(objetivo, peso);
+        _camara3D.LookAt(_fichaSeguida.GlobalPosition, Vector3.Up);
+    }
+
     // Aviso de inicio de turno: el panel centrado con el equipo que juega y el botón de tirar.
     private void MostrarTurno()
     {
@@ -75,19 +97,31 @@ public partial class Mundo : Node3D
         int valor = await _dado.Lanzar();
         _resultadoDado.Text = valor.ToString();
         await ToSignal(GetTree().CreateTimer(PausaResultado), SceneTreeTimer.SignalName.Timeout);
-        await ToSignal(MoverCamaraA(vista), Tween.SignalName.Finished);
 
-        // La ficha avanza cuando la cámara ya volvió al tablero, para que se vea el movimiento.
+        // Si el turno sigue, la cámara va de la mesa a la ficha que se va a mover; si no, vuelve al tablero.
+        bool vaALaFicha = gm.TurnoActual == turno;
+        Transform3D destino = vaALaFicha ? VistaSeguimiento(_tablero.Fichas[gm.TurnoEquipoId]) : vista;
+        await ToSignal(MoverCamaraA(destino), Tween.SignalName.Finished);
+
+        // La ficha avanza cuando la cámara ya llegó a ella; la sigue en picado y luego vuelve a la vista general.
         // Si el tiempo se acaba con la ficha ya en marcha, termina de moverse (y puede ganar).
         if (gm.TurnoActual == turno)
         {
             Movimiento movimiento = gm.MoverFicha(valor);
+            _fichaSeguida = _tablero.Fichas[movimiento.EquipoId];
             await ToSignal(_tablero.AnimarFicha(movimiento), Tween.SignalName.Finished);
+            _fichaSeguida = null;
+            await ToSignal(MoverCamaraA(vista), Tween.SignalName.Finished);
             if (gm.HaGanado(movimiento.EquipoId))
             {
                 MostrarGanador(movimiento.EquipoId);
                 return;
             }
+        }
+        else if (vaALaFicha)
+        {
+            // El tiempo se acabó mientras la cámara iba a la ficha: la tirada no cuenta, vuelve al tablero.
+            await ToSignal(MoverCamaraA(vista), Tween.SignalName.Finished);
         }
 
         _tiradaEnCurso = false;
@@ -119,6 +153,13 @@ public partial class Mundo : Node3D
         _mensajeCategoria.Hide();
         _mensajeGanador.Text = $"¡Gana {GameManager.Instancia.Equipos[equipoId].Nombre}!";
         _mensajeGanador.Show();
+    }
+
+    // Transform de la cámara en picado sobre la ficha: desplazada OffsetSeguimiento y mirándola.
+    private Transform3D VistaSeguimiento(Node3D ficha)
+    {
+        Vector3 origen = ficha.GlobalPosition + OffsetSeguimiento;
+        return new Transform3D(Basis.Identity, origen).LookingAt(ficha.GlobalPosition, Vector3.Up);
     }
 
     private Tween MoverCamaraA(Transform3D destino, float duracion = 0.6f)
